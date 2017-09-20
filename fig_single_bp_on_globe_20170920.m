@@ -3,7 +3,8 @@
 % 2016 05 07  Plot for NIFTI poster
 % 2016 05 07  Plot for ASA talk
 % 2016 07 21  Plot for paper
-% 2017 09 20  Add center of the beam on the figure
+% 2017 09 20  -- Add center of the beam on the figure
+%             -- Check location of the center of best-fitting ellipse
 
 clear
 if isunix
@@ -48,39 +49,23 @@ ss = strsplit(bat_proc_file,'_');
 for iF=1:length(freq_wanted)
     for iC=call_num
         ss_title = sprintf('bat %s, trial %s, click #%02d, freq %d kHz',ss{3},ss{4},iC,freq_wanted(iF)/1e3);
-        
-        mic_to_bat_angle = squeeze(data.proc.mic_to_bat_angle(iC,:,:));
-        call_dB = nan(1,data.mic_data.num_ch_in_file);
-        for iM=1:data.mic_data.num_ch_in_file
-            freq = data.proc.call_freq_vec{iC,iM};
-            [~,fidx] = min(abs(freq-freq_wanted(iF)));
-            call_dB(iM) = data.proc.call_psd_dB_comp_re20uPa_withbp{iC,iM}(fidx);
-        end
-        
-        % Check for channels to be excluded
-        if isempty(data.proc.ch_ex{iC})
-            ch_ex_manual = [];
-        else
-            ch_ex_manual = data.proc.ch_ex{iC};
-        end
-        ch_ex_sig = find(isnan(call_dB));  % low quality channel from call extraction function
-        
-        % Check for mics without location data
-        ch_good_loc = ~isnan(data.mic_loc(:,1))';
-        
-        % Interpolation
-        mic_num = 1:data.mic_data.num_ch_in_file;
-        angle_notnanidx = ~ismember(1:data.mic_data.num_ch_in_file,union(ch_ex_manual,ch_ex_sig)) & ch_good_loc;
-        az = mic_to_bat_angle(angle_notnanidx,1);
-        el = mic_to_bat_angle(angle_notnanidx,2);
-        
-        maxref = max(call_dB(angle_notnanidx));
+
+        % Load data from a particular freq
+        [call_dB,az,el,ch_good_idx] = get_call_azel_dB_data(data,freq_wanted(iF),iC);
+
+        % Take into account only good mics
+        az = az(ch_good_idx);
+        el = el(ch_good_idx);
+        call_dB = call_dB(ch_good_idx);
+                
+        % Normalize and interpolation
+        maxref = max(call_dB);
         call_dB_norm = call_dB-maxref;
         [azq,elq] = meshgrid(min(az):pi/180:max(az),min(el):pi/180:max(el));
         if strcmp(interp_opt,'rb_natural')  % natural neighbor interpolation
             vq = griddata(az,el,call_dB(angle_notnanidx),azq,elq,'natural');
         elseif strcmp(interp_opt,'rb_rbf')  % radial basis function interpolation
-            vq = rbfinterp([azq(:)';elq(:)'],rbfcreate([az(:)';el(:)'],call_dB(angle_notnanidx),'RBFFunction','multiquadrics'));
+            vq = rbfinterp([azq(:)';elq(:)'],rbfcreate([az(:)';el(:)'],call_dB(:)','RBFFunction','multiquadrics'));
             vq = reshape(vq,size(azq));
         end
         vq_norm = vq-maxref;
@@ -92,17 +77,31 @@ for iF=1:length(freq_wanted)
         clear in on
         vq(~in_smpl_poly) = NaN;
         vq_norm(~in_smpl_poly) = NaN;
-        
+
         % Plot interpolated beampattern with eckert4 projection
         elqm = elq;
         elqm(isnan(vq_norm)) = NaN;
         azqm = azq;
         azqm(isnan(vq_norm)) = NaN;
 
-        % Find beam center (=max point)
-        [vq_norm_max,vq_norm_max_idx] = max(vq_norm(:));
+        % Find beam center (=max beam energy point)
+        [~,vq_norm_max_idx] = max(vq_norm(:));
         vq_norm_max_el_loc = elq(vq_norm_max_idx);
         vq_norm_max_az_loc = azq(vq_norm_max_idx);
+
+        % Fit ellipse
+        map_proj = 'eckert4';
+        mstruct = defaultm(map_proj);
+        mstruct = defaultm(mstruct);
+        [click_side,raw,rot_max,rot_elpctr,rot_elpctr_tilt] = ...
+            shift_rotate_bp(az(ch_good_idx),el(ch_good_idx),...
+                            call_dB(ch_good_idx),map_proj,0.005);
+
+        % Project and rotate the ellipse center back to the map/beam coordinate
+        [el_ectr,az_ectr] = minvtran(mstruct,rot_max.E.x0,rot_max.E.y0);  % inverse map projection
+        [el_ectr_r,az_ectr_r] = rotatem(el_ectr,az_ectr,...
+                                        [vq_norm_max_el_loc,vq_norm_max_az_loc]/pi*180,...
+                                        'inverse','degrees');
         
         %     vq_norm_min = min(vq_norm(:));  % routine used in bp GUI
         %     contour_vec = -3:-3:(floor(vq_norm_min/3)-1)*3;
@@ -119,8 +118,17 @@ for iF=1:length(freq_wanted)
         contourfm(elq/pi*180,azq/pi*180,vq_norm,contour_vec(2:cvec_min_idx),...
             'fill','on','linecolor','w');  % don't plot 0 dB contour
         hold on
+        
+        % location of mics
         plotm(el/pi*180,az/pi*180,'kx','markersize',8,'linewidth',2);
-        plotm(vq_norm_max_el_loc/pi*180,vq_norm_max_az_loc/pi*180,'ro','markersize',8,'linewidth',2)
+        
+        % location of max beam energy
+        plotm(vq_norm_max_el_loc/pi*180,vq_norm_max_az_loc/pi*180,...
+              'rx','markersize',8,'linewidth',2)
+        
+        % location of center of best-fitting ellipse
+        plotm(el_ectr_r,az_ectr_r,'ro','markersize',8,'linewidth',2)
+        
 %         textm(el/pi*180,az/pi*180,num2str(mic_num(angle_notnanidx)'),...
 %             'horizontalalignment','center','fontsize',14);
         colorbar('southoutside','ticks',fliplr(contour_vec(1:cvec_min_idx)));
