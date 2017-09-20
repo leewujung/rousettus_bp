@@ -1,0 +1,47 @@
+Click #18 of file rousettus_20150825_34271_04_mic_data_bp_proc.mat
+
+
+With ch#33 being the max channel:
+Click #18 of file 34271_04
+Click #20 of file 34271_04*** best SNR
+Click #02 of file 36134_04
+Click #23 of file 36134_05
+Click #36 of file 36134_09
+Click #17 of file 39184_01
+Click #13 of file 39184_02
+Click #02 of file 39184_03
+Click #25 of file 39184_07
+Click #07 of file 39184_10
+Click #10 of file 39184_10
+
+With ch#33 being max-1 dB:
+Click #05 of file 34271_02
+Click #17 of file 34271_04
+Click #18 of file 34271_04
+Click #20 of file 34271_04
+Click #06 of file 34271_05
+Click #03 of file 34271_08
+Click #11 of file 36134_03
+Click #14 of file 36134_03
+Click #02 of file 36134_04
+Click #22 of file 36134_05
+Click #23 of file 36134_05
+Click #03 of file 36134_06
+Click #18 of file 36134_07
+Click #33 of file 36134_09
+Click #36 of file 36134_09
+Click #37 of file 36134_09
+Click #25 of file 36134_10
+Click #17 of file 39184_01
+Click #23 of file 39184_01
+Click #11 of file 39184_02
+Click #13 of file 39184_02
+Click #02 of file 39184_03
+Click #18 of file 39184_04
+Click #19 of file 39184_04
+Click #25 of file 39184_07
+Click #12 of file 39184_08
+Click #01 of file 39184_10
+Click #03 of file 39184_10
+Click #07 of file 39184_10
+Click #10 of file 39184_10

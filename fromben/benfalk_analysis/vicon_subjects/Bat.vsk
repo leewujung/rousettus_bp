@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<KinematicModel VERSION="2.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.vicon.com/Schemas/ViconVST.xsd">
+
+  <Parameters>
+    <Parameter HIDDEN="1" NAME="Head_Length" PRIOR="13.6243019104004" SD="1.00000002004088e+020" VALUE="13.6243019104004"/>
+    <Parameter HIDDEN="1" NAME="Head_Unlabeled21_y" PRIOR="12.1167192459106" SD="1.00000002004088e+020" VALUE="12.1167192459106"/>
+    <Parameter HIDDEN="1" NAME="Head_Unlabeled21_z" PRIOR="-6.39165878295898" SD="1.00000002004088e+020" VALUE="-6.39165878295898"/>
+  </Parameters>
+
+  <Skeleton>
+    <Segment BOUNDS="-1.36243 -1.36243 -'Head_Length' 1.36243 1.36243 0" CONTEXT="General" INERTIA="0 0 0 " MASS="0 " MASS-CENTRE="0 0 0 " NAME="Head" RGB="255 164 0">
+      <JointFree BOUNDS="0 0 0 0 0 0 0 0 0 0 0 0" COVARIANCE="2.46490001678467 0 0 0 0 0  0 2.46490001678467 0 0 0 0  0 0 246.490005493164 0 0 0  0 0 0 1000000 0 0  0 0 0 0 1000000 0  0 0 0 0 0 1000000  " MEAN="0 0 0 0 0 0" NAME="World_Head" POST-ORIENTATION="0 0 0" POST-POSITION="0 0 0" PRE-ORIENTATION="0 0 0" PRE-POSITION="0 0 0" SIGNS="+ + + + + + " T="* * * * * * ">
+        <JointTemplate COVARIANCE="2.46490001678467 0 0 0 0 0  0 2.46490001678467 0 0 0 0  0 0 246.490005493164 0 0 0  0 0 0 1000000 0 0  0 0 0 0 1000000 0  0 0 0 0 0 1000000  " MEAN="0 0 0 0 0 0" POST-ORIENTATION="0 0 0 " POST-POSITION="0 0 0 " PRE-ORIENTATION="0 0 0 " PRE-POSITION="0 0 0 " TPOSE-COVARIANCE="0.100000001490116 0 0 0 0 0  0 0.100000001490116 0 0 0 0  0 0 0.100000001490116 0 0 0  0 0 0 0.100000001490116 0 0  0 0 0 0 0.100000001490116 0  0 0 0 0 0 0.100000001490116  " TPOSE-MEAN="0 0 0 0 0 0"/>
+      </JointFree>
+    </Segment>
+  </Skeleton>
+
+  <MarkerSet>
+    <Markers>
+      <Marker COVARIANCE="1 0 0 0 1 0 0 0 1 " NAME="Tip" POSITION="0 0 0" RADIUS="6" RGB="255 164 0" SEGMENT="Head" STATUS="required">
+        <MarkerTemplate COVARIANCE="1 0 0 0 1 0 0 0 1 " PLACEMENT-COVARIANCE="1 0 0 0 1 0 0 0 1 " POSITION="0 0 0"/>
+      </Marker>
+      <Marker COVARIANCE="1 0 0 0 1 0 0 0 1 " NAME="Left" POSITION="4.44089e-016 0 -13.6243" RADIUS="6" RGB="255 164 0" SEGMENT="Head" STATUS="required">
+        <MarkerTemplate COVARIANCE="1 0 0 0 1 0 0 0 1 " PLACEMENT-COVARIANCE="1 0 0 0 1 0 0 0 1 " POSITION="0 0 -'Head_Length'"/>
+      </Marker>
+      <Marker COVARIANCE="1 0 0 0 1 0 0 0 1 " NAME="Right" POSITION="8.88178e-016 12.1167 -6.39166" RADIUS="6" RGB="255 164 0" SEGMENT="Head" STATUS="required">
+        <MarkerTemplate COVARIANCE="1 0 0 0 1 0 0 0 1 " PLACEMENT-COVARIANCE="1 0 0 0 1 0 0 0 1 " POSITION="0 'Head_Unlabeled21_y' 'Head_Unlabeled21_z'"/>
+      </Marker>
+    </Markers>
+    <Sticks>
+      <Stick MARKER1="Tip" MARKER2="Left" RGB="255 164 0"/>
+      <Stick MARKER1="Tip" MARKER2="Right" RGB="255 164 0"/>
+      <Stick MARKER1="Left" MARKER2="Right" RGB="255 164 0"/>
+    </Sticks>
+  </MarkerSet>
+
+  <Alignment/>
+
+</KinematicModel>

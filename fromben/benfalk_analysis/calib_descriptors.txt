@@ -1,0 +1,71 @@
+20150817\Trial01.Trial01.enf: 
+20150817\Trial02.Trial02.enf: 
+20150817\Trial03.Trial03.enf: 
+20150818\Trial01.Trial01.enf: sputnik cal frame
+20150818\Trial02.Trial02.enf: all mikes with tips
+20150818\Trial03.Trial03.enf: mic-tips-afternoon
+20150819\Trial01.Trial01.enf: large-sputnik-calib
+20150819\Trial02.Trial02.enf: all-mics-tips
+20150819\Trial03.Trial03.enf: repositioning mic 4-4, bat landed on it
+20150819\Trial04.Trial04.enf: mics+tips+afternoon
+20150819\Trial05.Trial05.enf: mics hit
+20150819\Trial06.Trial06.enf: mics hit
+20150819\Trial07.Trial07.enf: mics hit
+20150819\Trial08.Trial08.enf: mic hit
+20150819\Trial09.Trial09.enf: mic hit
+20150819\Trial10.Trial10.enf: mic hit
+20150819\Trial11.Trial11.enf: mic hit
+20150820\Trial01.Trial01.enf: mic+tips+morning
+20150820\Trial02.Trial02.enf: mic hit
+20150820\Trial03.Trial03.enf: mic hit
+20150820\Trial04.Trial04.enf: mic hit
+20150820\Trial05.Trial05.enf: mic hit
+20150820\Trial06.Trial06.enf: mic hit
+20150820\Trial07.Trial07.enf: mic hit
+20150824\Trial01.Trial01.enf: mics+tips
+20150824\Trial02.Trial02.enf: miro sputnik
+20150824\Trial03.Trial03.enf: mis + tips again
+20150825\Trial01.Trial01.enf: sputnik
+20150825\Trial02.Trial02.enf: mics+tips
+20150825\Trial03.Trial03.enf: mics+tips
+20150825\Trial04.Trial04.enf: mics+tips
+20150825\Trial05.Trial05.enf: mic hit
+20150825\Trial06.Trial06.enf: mics+tips+afternoon
+20150825\Trial07.Trial07.enf: mics+tips+afternoon
+20150825\Trial08.Trial08.enf: mics+tips+afternoon
+20150826\Trial01.Trial01.enf: speaker_calib
+20150826\Trial02.Trial02.enf: speaker_calib
+20150826\Trial03.Trial03.enf: speaker_calib
+20150826\Trial04.Trial04.enf: speaker_calib
+20150826\Trial05.Trial05.enf: speaker_calib
+20150826\Trial06.Trial06.enf: speaker_calib
+20150826\Trial07.Trial07.enf: speaker_calib
+20150826\Trial08.Trial08.enf: speaker_calib
+20150826\Trial09.Trial09.enf: speaker_calib
+20150826\Trial10.Trial10.enf: speaker_calib
+20150826\Trial11.Trial11.enf: speaker_calib
+20150826\Trial12.Trial12.enf: mics+tips
+20150828\Trial01.Trial01.enf: mics+tips
+20150828\Trial02.Trial02.enf: speaker_pos
+20150828\Trial03.Trial03.enf: speaker_pos
+20150828\Trial04.Trial04.enf: speaker_pos
+20150828\Trial05.Trial05.enf: speaker_pos
+20150828\Trial06.Trial06.enf: speaker_pos
+20150828\Trial07.Trial07.enf: speaker_pos
+20150828\Trial08.Trial08.enf: speaker_pos
+20150828\Trial09.Trial09.enf: speaker_pos
+20150828\Trial10.Trial10.enf: speaker_pos
+20150828\Trial11.Trial11.enf: speaker_pos
+20150828\Trial12.Trial12.enf: speaker_pos
+20150828\Trial13.Trial13.enf: speaker_pos
+20150828\Trial14.Trial14.enf: speaker_pos
+20150828\Trial15.Trial15.enf: speaker_pos
+20150828\Trial16.Trial16.enf: speaker_pos
+20150828\Trial17.Trial17.enf: speaker_pos
+20150910\Trial01.Trial01.enf: mics+tips
+20150910\Trial02.Trial02.enf: mics+tips
+20150910\Trial03.Trial03.enf: mics+tips
+20150910\Trial04.Trial04.enf: mics+tips
+20150910\Trial05.Trial05.enf: 
+20150910\Trial06.Trial06.enf: 
+20150911\Trial01.Trial01.enf: mics+tips
