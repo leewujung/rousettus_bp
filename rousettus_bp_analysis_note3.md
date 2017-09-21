@@ -46,9 +46,10 @@ Move most BEM calculation results off from the gal-e server. Only keep the ones 
 	* For composite measured clicks, the averaged location of all points >-1 dB normalized beam energy ('r^') is much closer to the location of the center of the best-fitting ellipse ('ro') than just the max beam energy location ('rx').
 	<img src=./img/fig_composite_click_avg_bp_20170920_batall_bin10_th0_35kHz_avg_bp_left.png width="400">	<img src=./img/fig_composite_click_avg_bp_20170920_batall_bin10_th0_35kHz_avg_bp_right.png width="400">
 	* The above is the same for individual measured clicks: 'r^' is closer to 'ro' than 'rx'
-		<img src=./img/fig_single_bp_on_globe_20170920_36134_02_c19_f35kHz_eckert4_rbf_mic.png width="400">	<img src=./img/fig_single_bp_on_globe_20170920_36134_02_c20_f35kHz_eckert4_rbf_mic.png width="400">
-
-
+	<img src=./img/fig_single_bp_on_globe_20170920_36134_02_c19_f35kHz_eckert4_rbf_mic.png width="400">	<img src=./img/fig_single_bp_on_globe_20170920_36134_02_c20_f35kHz_eckert4_rbf_mic.png width="400">
+	* The above is also true for modeled beampattern: 'r^' is closer to 'ro' than 'rx'
+	<img src=./img/fig_model_steer_h_bpctr_20160917_Ra-colony-rotear-0.5mm_x029t023_y000.0_z-05.0_2345_90deg_left_cntr.png width="800">	<img src=./img/fig_model_steer_h_bpctr_20160917_Ra-colony-rotear-0.5mm_x029t023_y000.0_z-05.0_2345_90deg_left_all.png width="800">
+	
 
 ## TO-DO
 * Use the plotting routines in `plot_indiv_click_rorate` to update those in the beampattern processing GUI, since doing conversion to map domain and plot using `contour` is much faster than calling `contourfm`
