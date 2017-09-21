@@ -40,6 +40,13 @@ Move most BEM calculation results off from the gal-e server. Only keep the ones 
 
 
 
+## 2017/09/21
+### Cont: Quantification of measured and modeled beampattern
+* Compare the max beam energy location vs averaged location for the top 1%.
+	* For composite measured clicks, the averaged location of all points >-1 dB normalized beam energy ('r^') is much closer to the location of the center of the best-fitting ellipse ('ro') than just the max beam energy location ('rx').
+	<img src=./img/fig_composite_click_avg_bp_20170920_batall_bin10_th0_35kHz_avg_bp_left.png width="400">	<img src=./img/fig_composite_click_avg_bp_20170920_batall_bin10_th0_35kHz_avg_bp_right.png width="400">
+
+
 ## TO-DO
 * Use the plotting routines in `plot_indiv_click_rorate` to update those in the beampattern processing GUI, since doing conversion to map domain and plot using `contour` is much faster than calling `contourfm`
 
