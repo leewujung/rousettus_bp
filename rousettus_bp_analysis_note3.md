@@ -24,11 +24,11 @@ Move most BEM calculation results off from the gal-e server. Only keep the ones 
 ## 2017/09/20
 ### Quantification of measured and modeled beampattern
 * Beam center for individual click measurements `fig_single_bp_on_globe_20170920`:
-	* if use **max point _after_ interpolation ('rx')** as the beam center: Observed that the beam centers are either on top of the mic with max receiving level or between 2-3 mics with highest receicing levels. This means the beam center found in individual measured beampatterns are strongly affected by spatial under-sampling.
-	* if use **center of the best-fitting ellipse ('ro')** as the beam center, the locations of the beam center are more consistent with what one would expect by only looking at the -3 dB contours. Using this also potentially mitigates the bias from spatial under-sampling.
+	* if use _max point _after_ interpolation ('rx')_ as the beam center: Observed that the beam centers are either on top of the mic with max receiving level or between 2-3 mics with highest receicing levels. This means the beam center found in individual measured beampatterns are strongly affected by spatial under-sampling.
+	* if use _center of the best-fitting ellipse ('ro')_ as the beam center, the locations of the beam center are more consistent with what one would expect by only looking at the -3 dB contours. Using this also potentially mitigates the bias from spatial under-sampling.
 * Beam center for composite clicks: `fig_composite_click_avg_bp_20170920`
-	* if use **max point _after_ interpolation ('rx')** as the beam center: In the plot can see the beam center moves from outer side to inner side as frequency increases from 25 kHz to 45 kHz, but from 45 kHz to 50 kHz it's a _vertical downward_ movement. This pattern is reproduced for both left and right composite clicks.
-	* if use **center of the best-fitting ellipse ('ro')** as the beam center: the locations of the ellipse centers are generally fairly close to the max beam energy location
+	* if use _max point _after_ interpolation ('rx')_ as the beam center: In the plot can see the beam center moves from outer side to inner side as frequency increases from 25 kHz to 45 kHz, but from 45 kHz to 50 kHz it's a _vertical downward_ movement. This pattern is reproduced for both left and right composite clicks.
+	* if use _center of the best-fitting ellipse ('ro')_ as the beam center: the locations of the ellipse centers are generally fairly close to the max beam energy location
 * Beam center for model results `fig_model_steer_h_bpctr`:
 	* max beam energy location jumps around a bit across all steered angles, whereas center of best-fitting ellipse is very stable --> therefore use the latter in figures
 * Tomorrow:
@@ -42,14 +42,29 @@ Move most BEM calculation results off from the gal-e server. Only keep the ones 
 
 ## 2017/09/21
 ### Cont: Quantification of measured and modeled beampattern
-* Compare the max beam energy location vs averaged location for the top X%.
-	* For composite measured clicks, the averaged location of all points >-1 dB normalized beam energy ('r^') is much closer to the location of the center of the best-fitting ellipse ('ro') than just the max beam energy location ('rx').
+* Follow from yesterday: compare the max beam energy location vs averaged location for the top X%.
+	* For composite measured clicks, the averaged location of all points >-1 dB normalized beam energy ('r^') is much closer to the location of the center of the best-fitting ellipse ('ro') than just the max beam energy location ('rx') (`fig_composite_click_avg_bp_20170920`)
 	<img src=./img/fig_composite_click_avg_bp_20170920_batall_bin10_th0_35kHz_avg_bp_left.png width="400">	<img src=./img/fig_composite_click_avg_bp_20170920_batall_bin10_th0_35kHz_avg_bp_right.png width="400">
-	* The above is the same for individual measured clicks: 'r^' is closer to 'ro' than 'rx'
+	* The above is the same for individual measured clicks: 'r^' is closer to 'ro' than 'rx' (`fig_single_bp_on_globe_20170920`)
 	<img src=./img/fig_single_bp_on_globe_20170920_36134_02_c19_f35kHz_eckert4_rbf_mic.png width="400">	<img src=./img/fig_single_bp_on_globe_20170920_36134_02_c20_f35kHz_eckert4_rbf_mic.png width="400">
-	* The above is also true for modeled beampattern: 'r^' is closer to 'ro' than 'rx'
+	* The above is also true for modeled beampattern: 'r^' is closer to 'ro' than 'rx' (`fig_model_steer_h_bpctr`)
 	<img src=./img/fig_model_steer_h_bpctr_20160917_Ra-colony-rotear-0.5mm_x029t023_y000.0_z-05.0_2345_90deg_left_cntr.png width="800">	<img src=./img/fig_model_steer_h_bpctr_20160917_Ra-colony-rotear-0.5mm_x029t023_y000.0_z-05.0_2345_90deg_left_all.png width="800">
+	* Based on the above results, the conclusion is that **it is safe to use the center of the best-fitting ellipse to denote the beam center**.
+* Find beam center for composite modeled clicks:
+	* It seems like the submitted paper used simulated results from 20161009, but should use results from 20161025, which include the newer version of `shift_rotate_bp` that does not kick out out-of-bnd points.
+	* Need new code for multi-freq Monte Carlo simulation for projected beampattern. Based the development on `model_bp_proj_RaColony_20161025` and the new multi-freq code is `model_bp_proj_RaColony_20170921`
 	
+	
+	
+* **NOTE** All simulated beampattern in the original submission (v10 of fig folders) used mouth array position '3456'.
+	* Considering using '2345' in the resubmission? The center of best-fitting ellipse and the averaged location for all points with normalized beam energy >-1 corresponds better to each other in '2345' scenario.
+* **NOTE re. source locations used by original submission**
+	*`model_bp_save_20161009` used a different numbering of sources that could cause confusion: used `SRC.idx_left([4,5,6,2]))` without the type of sorting used in `fig_model_steer_h_bpctr.m` now correct it to use the same type of sorting for source locations so that the code is more trackable --> but it turned out that model_bp_20161009 actually uses the source combination of '3456' correctly. Therefore results from `model_bp_proj_RaColony_20161025` used by the original submission were fine (indeed used sources '3456'.
+	* `model_bp_save_multiple_20161014` used the same ordering of source locations without sorting like in `model_bp_save_20161009`, therefore results from `model_bp_proj_RaColony_multiple_20161025` used by the original submission were fine.
+
+* Now characterize the movement of multi-freq center in both measurements and models
+	* Compare composite clicks since the results are more stable, but note that the beam locations have been shifted based on the max beam location at 35 kHz
+
 
 ## TO-DO
 * Use the plotting routines in `plot_indiv_click_rorate` to update those in the beampattern processing GUI, since doing conversion to map domain and plot using `contour` is much faster than calling `contourfm`
