@@ -42,9 +42,12 @@ Move most BEM calculation results off from the gal-e server. Only keep the ones 
 
 ## 2017/09/21
 ### Cont: Quantification of measured and modeled beampattern
-* Compare the max beam energy location vs averaged location for the top 1%.
+* Compare the max beam energy location vs averaged location for the top X%.
 	* For composite measured clicks, the averaged location of all points >-1 dB normalized beam energy ('r^') is much closer to the location of the center of the best-fitting ellipse ('ro') than just the max beam energy location ('rx').
 	<img src=./img/fig_composite_click_avg_bp_20170920_batall_bin10_th0_35kHz_avg_bp_left.png width="400">	<img src=./img/fig_composite_click_avg_bp_20170920_batall_bin10_th0_35kHz_avg_bp_right.png width="400">
+	* The above is the same for individual measured clicks: 'r^' is closer to 'ro' than 'rx'
+		<img src=./img/fig_single_bp_on_globe_20170920_36134_02_c19_f35kHz_eckert4_rbf_mic.png width="400">	<img src=./img/fig_single_bp_on_globe_20170920_36134_02_c20_f35kHz_eckert4_rbf_mic.png width="400">
+
 
 
 ## TO-DO

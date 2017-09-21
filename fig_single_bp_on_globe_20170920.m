@@ -85,10 +85,17 @@ for iF=1:length(freq_wanted)
         azqm(isnan(vq_norm)) = NaN;
 
         % Find beam center (=max beam energy point)
-        [~,vq_norm_max_idx] = max(vq_norm(:));
+        xx = vq_norm(:);
+        [~,vq_norm_max_idx] = max(xx);
         vq_norm_max_el_loc = elq(vq_norm_max_idx);
         vq_norm_max_az_loc = azq(vq_norm_max_idx);
+        xx(isnan(xx)) = -inf;
+        [~,sort_idx] = sort(xx,'descend');
+        ii = xx(sort_idx)>-1;
+        vq_norm_top_el_loc = mean(elq(sort_idx(ii)));
+        vq_norm_top_az_loc = mean(azq(sort_idx(ii)));
 
+        
         % Fit ellipse
         map_proj = 'eckert4';
         mstruct = defaultm(map_proj);
@@ -125,7 +132,11 @@ for iF=1:length(freq_wanted)
         % location of max beam energy
         plotm(vq_norm_max_el_loc/pi*180,vq_norm_max_az_loc/pi*180,...
               'rx','markersize',8,'linewidth',2)
-        
+
+        % location of max beam energy
+        plotm(vq_norm_top_el_loc/pi*180,vq_norm_top_az_loc/pi*180,...
+              'r^','markersize',8,'linewidth',2)
+
         % location of center of best-fitting ellipse
         plotm(el_ectr_r,az_ectr_r,'ro','markersize',8,'linewidth',2)
         
