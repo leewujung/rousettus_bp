@@ -51,8 +51,13 @@ Move most BEM calculation results off from the gal-e server. Only keep the ones 
 	<img src=./img/fig_model_steer_h_bpctr_20160917_Ra-colony-rotear-0.5mm_x029t023_y000.0_z-05.0_2345_90deg_left_cntr.png width="800">	<img src=./img/fig_model_steer_h_bpctr_20160917_Ra-colony-rotear-0.5mm_x029t023_y000.0_z-05.0_2345_90deg_left_all.png width="800">
 	* Based on the above results, the conclusion is that **it is safe to use the center of the best-fitting ellipse to denote the beam center**.
 * Find beam center for composite modeled clicks:
-	* It seems like the submitted paper used simulated results from 20161009, but should use results from 20161025, which include the newer version of `shift_rotate_bp` that does not kick out out-of-bnd points.
-	* Need new code for multi-freq Monte Carlo simulation for projected beampattern. Based the development on `model_bp_proj_RaColony_20161025` and the new multi-freq code is `model_bp_proj_RaColony_20170921`
+	* It seems like the submitted paper used simulated results from 20161009, but should actually redo the simulation using rotation results from 20170308 (produced by `rotate_all_click_2010308`, note the missing `7` in the folder/file name). This would include the application of the newer version of `shift_rotate_bp` that does not kick out out-of-bnd points (which was corrected in `rotate_all_click_20161025`).
+	* The new simulation code is `model_bp_proj_RaColony_20170921`, in which only 35 kHz projection was done, but parameters needed for projecting models at other frequencies based on beam center alignment at 35 kHz are saved. These critical parameters are `model.az_diff` and `model.el_diff`. Explanation of the saved variables is as follows:
+		* `param`: parameters
+		* `map`: definition of map system used
+		* `data`: beam center calculated from data
+		* `BP`: beam center calulated from beampattern model
+		* `model_rot`: rotation results from projected beampattern
 	
 	
 	

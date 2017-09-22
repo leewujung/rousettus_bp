@@ -94,7 +94,6 @@ for iF=1:length(freq_wanted)
         ii = xx(sort_idx)>-1;
         vq_norm_top_el_loc = mean(elq(sort_idx(ii)));
         vq_norm_top_az_loc = mean(azq(sort_idx(ii)));
-
         
         % Fit ellipse
         map_proj = 'eckert4';
