@@ -184,151 +184,156 @@ for iN=1:length(noise_std_all)
         top_elq_loc = mean(data.raw.elq(sort_idx(ii)));  % [deg]
         top_azq_loc = mean(data.raw.azq(sort_idx(ii)));
         % --- fit ellipse
-        [el_ectr,az_ectr] = minvtran(mstruct,data.rot_max.E.x0,...
-                                     data.rot_max.E.y0);  % inverse map projection
-        [el_ectr_r,az_ectr_r] = rotatem(el_ectr,az_ectr,...  % [deg]
-                                        [max_elq_loc,max_azq_loc],...
-                                        'inverse','degrees');
-        
-        % Model bp
-        if data.raw_meas.click_side==1  % right click --> no need to flip az
-            azq_model = BP.azq;
-            az_model = BP.az;
-            max_azq_loc_model = BP.max_azq_loc;
-            top_azq_loc_model = BP.top_azq_loc;
-            az_ectr_r_model = BP.az_ectr_r;
-        else   % left click
-            azq_model = -BP.azq;
-            az_model = -BP.az;
-            max_azq_loc_model = -BP.max_azq_loc;
-            top_azq_loc_model = -BP.top_azq_loc;
-            az_ectr_r_model = -BP.az_ectr_r;
-        end
-        elq_model = BP.elq;
-        el_model = BP.el;
-        max_elq_loc_model = max_elq_loc;
-        top_elq_loc_model = top_elq_loc;
-        el_ectr_r_model = el_ectr_r;
+        if isempty(data.rot_elpctr)  % if data.rot_max.E.x0-y0 are not within
+                                     % valid minvtran range
+            S.data = [];
+            S.model_rot = [];
 
-        switch bpctr_opt
-          case 'max'
-            el_diff = max_elq_loc-max_elq_loc_model;
-            az_diff = max_azq_loc-max_azq_loc_model;
-          case 'top'
-            el_diff = top_elq_loc-top_elq_loc_model;
-            az_diff = top_azq_loc-top_azq_loc_model;
-          case 'ectr'
-            el_diff = el_ectr_r-el_ectr_r_model;
-            az_diff = az_ectr_r-az_ectr_r_model;
-        end
-        
-        S.data.max_elq_loc = max_elq_loc;
-        S.data.max_azq_loc = max_azq_loc;
-        S.data.top_elq_loc = top_elq_loc;
-        S.data.top_azq_loc = top_azq_loc;
-        S.data.el_ectr_r = el_ectr_r;
-        S.data.az_ectr_r = az_ectr_r;
-        S.data.el_diff = el_diff;
-        S.data.az_diff = az_diff;
-                                        
-        % Rotate model bp according to max az/el
-        [elq_model_rot,azq_model_rot] = rotatem(elq_model,azq_model,...
-                                                [el_diff,az_diff],'inverse','degrees');
-        [el_model_rot,az_model_rot] = rotatem(el_model,az_model,...
-                                              [el_diff,az_diff],'inverse','degrees');
-        
-        % Project model bp to mic loc
-        idxnotnan = ~isnan(BP.pp_plot);
-        vq_mic = rbfinterp([data.raw.az(:)';data.raw.el(:)'],...
-                           rbfcreate([az_model_rot(idxnotnan)';el_model_rot(idxnotnan)'],...
-                                     BP.pp_plot(idxnotnan)',...
-                                     'RBFFunction','multiquadrics'));
-
-        % Add noise
-        vq_mic = vq_mic+randn(size(vq_mic))*noise_std+noise_mean;
-
-        % Fit ellipse
-        [click_side,raw,rot_max,rot_elpctr,rot_elpctr_tilt] = ...
-            shift_rotate_bp(data.raw.az/180*pi,data.raw.el/180*pi,...
-                            vq_mic,'eckert4',it_shift_th);
-        
-        % if the best-fitting ellipse for shift_max is outside of globe
-        % then don't plot
-        if isempty(rot_elpctr) || isempty(rot_elpctr_tilt)
-            flag_elps_fail = 1;
         else
-            flag_elps_fail = 0;
-        end
-        
-        % Check az, el shift and tilt
-        if plot_opt_indiv_click==1 && flag_elps_fail~=1
-            Vpass.raw = raw;
-            Vpass.rot_max = rot_max;
-            Vpass.rot_elpctr = rot_elpctr;
-            Vpass.rot_elpctr_tilt = rot_elpctr_tilt;
+            [el_ectr,az_ectr] = minvtran(mstruct,data.rot_max.E.x0,...
+                                         data.rot_max.E.y0);  % inverse map projection
+            [el_ectr_r,az_ectr_r] = rotatem(el_ectr,az_ectr,...  % [deg]
+                                            [max_elq_loc,max_azq_loc],...
+                                            'inverse','degrees');
             
-            % Movement of [az,el] of each mic
-            fig_azel = plot_indiv_click_azel_movement(Vpass);
-            title(regexprep(save_fname,'_','\\_'));
-            saveSameSize(fig_azel,'file',...
-                         fullfile(save_path,sprintf('%s_azel_chk.png',save_fname)),...
-                         'format','png','renderer','painters');
-            close(fig_azel)
-            
-            % Plot the shift/tilt procedure
-            fig_fit = plot_indiv_click_rotate(Vpass,cvec,mstruct);
-            suptitle(regexprep(save_fname,'_','\\_'));
-            saveSameSize(fig_fit,'file',...
-                         fullfile(save_path,sprintf('%s_contour.png',save_fname)),...
-                         'format','png','renderer','painters');
-            close(fig_fit)
-        end
-        
-        % Rotated model output
-        S.model_rot.click_side = click_side;
-        S.model_rot.raw = raw;
-        S.model_rot.rot_max = rot_max;
-        S.model_rot.rot_elpctr = rot_elpctr;
-        S.model_rot.rot_elpctr_tilt = rot_elpctr_tilt;
-        
-        % Plot rotated bp using ellipse center
-        if flag_count<=length(trial_file_all) && flag_elps_fail~=1
-            if plot_opt_all_click
-                figure(fig_clicks)
-                subplot(numrow,4,flag_count);
-                axesm(mstruct)
-                contour(rot_elpctr_tilt.xq,rot_elpctr_tilt.yq,rot_elpctr_tilt.vq_norm,cvec,'fill','on');
-                framem('fedgecolor',200*ones(1,3)/255,'flonlimit',[-180 180]);
-                gridm('gcolor',190*ones(1,3)/255,'glinestyle','-');
-                tightmap
-                axis off
-                title(sprintf('Call #%02d',str2double(ss{7}(2:3))));
-                colormap(parula(length(cvec)-1));
-                caxis([cvec(end), 0])
+            % Model bp
+            if data.raw_meas.click_side==1  % right click --> no need to flip az
+                azq_model = BP.azq;
+                az_model = BP.az;
+                max_azq_loc_model = BP.max_azq_loc;
+                top_azq_loc_model = BP.top_azq_loc;
+                az_ectr_r_model = BP.az_ectr_r;
+            else   % left click
+                azq_model = -BP.azq;
+                az_model = -BP.az;
+                max_azq_loc_model = -BP.max_azq_loc;
+                top_azq_loc_model = -BP.top_azq_loc;
+                az_ectr_r_model = -BP.az_ectr_r;
             end
-        end
+            elq_model = BP.elq;
+            el_model = BP.el;
+            max_elq_loc_model = max_elq_loc;
+            top_elq_loc_model = top_elq_loc;
+            el_ectr_r_model = el_ectr_r;
 
-        if flag_count==length(trial_file_all)
-            flag_trial = 0;
-            flag_count = 0;
-            if plot_opt_all_click
-                figure(fig_clicks)
-                suptitle(regexprep(sprintf('%s, %s, all clicks',script_name,t_name),'_','\\_'));
-                saveSameSize(fig_clicks,'file',...
-                             fullfile(save_path,sprintf('all_clicks_%s_%s.png',script_name,t_name)),...
-                             'format','png','renderer','painters');
-                saveSameSize(fig_clicks,'file',...
-                             fullfile(save_path,sprintf('%s_%s_all_clicks.png',script_name,t_name)),...
-                             'format','png','renderer','painters');
-                close(fig_clicks)
+            switch bpctr_opt
+              case 'max'
+                el_diff = max_elq_loc-max_elq_loc_model;
+                az_diff = max_azq_loc-max_azq_loc_model;
+              case 'top'
+                el_diff = top_elq_loc-top_elq_loc_model;
+                az_diff = top_azq_loc-top_azq_loc_model;
+              case 'ectr'
+                el_diff = el_ectr_r-el_ectr_r_model;
+                az_diff = az_ectr_r-az_ectr_r_model;
             end
-        end
+            
+            S.data.max_elq_loc = max_elq_loc;
+            S.data.max_azq_loc = max_azq_loc;
+            S.data.top_elq_loc = top_elq_loc;
+            S.data.top_azq_loc = top_azq_loc;
+            S.data.el_ectr_r = el_ectr_r;
+            S.data.az_ectr_r = az_ectr_r;
+            S.data.el_diff = el_diff;
+            S.data.az_diff = az_diff;
+            
+            % Rotate model bp according to max az/el
+            [elq_model_rot,azq_model_rot] = rotatem(elq_model,azq_model,...
+                                                    [el_diff,az_diff],'inverse','degrees');
+            [el_model_rot,az_model_rot] = rotatem(el_model,az_model,...
+                                                  [el_diff,az_diff],'inverse','degrees');
+            
+            % Project model bp to mic loc
+            idxnotnan = ~isnan(BP.pp_plot);
+            vq_mic = rbfinterp([data.raw.az(:)';data.raw.el(:)'],...
+                               rbfcreate([az_model_rot(idxnotnan)';el_model_rot(idxnotnan)'],...
+                                         BP.pp_plot(idxnotnan)',...
+                                         'RBFFunction','multiquadrics'));
+
+            % Add noise
+            vq_mic = vq_mic+randn(size(vq_mic))*noise_std+noise_mean;
+
+            % Fit ellipse
+            [click_side,raw,rot_max,rot_elpctr,rot_elpctr_tilt] = ...
+                shift_rotate_bp(data.raw.az/180*pi,data.raw.el/180*pi,...
+                                vq_mic,'eckert4',it_shift_th);
+            
+            % if the best-fitting ellipse for shift_max is outside of globe
+            % then don't plot
+            if isempty(rot_elpctr) || isempty(rot_elpctr_tilt)
+                flag_elps_fail = 1;
+            else
+                flag_elps_fail = 0;
+            end
+            
+            % Check az, el shift and tilt
+            if plot_opt_indiv_click==1 && flag_elps_fail~=1
+                Vpass.raw = raw;
+                Vpass.rot_max = rot_max;
+                Vpass.rot_elpctr = rot_elpctr;
+                Vpass.rot_elpctr_tilt = rot_elpctr_tilt;
+                
+                % Movement of [az,el] of each mic
+                fig_azel = plot_indiv_click_azel_movement(Vpass);
+                title(regexprep(save_fname,'_','\\_'));
+                saveSameSize(fig_azel,'file',...
+                             fullfile(save_path,sprintf('%s_azel_chk.png',save_fname)),...
+                             'format','png','renderer','painters');
+                close(fig_azel)
+                
+                % Plot the shift/tilt procedure
+                fig_fit = plot_indiv_click_rotate(Vpass,cvec,mstruct);
+                suptitle(regexprep(save_fname,'_','\\_'));
+                saveSameSize(fig_fit,'file',...
+                             fullfile(save_path,sprintf('%s_contour.png',save_fname)),...
+                             'format','png','renderer','painters');
+                close(fig_fit)
+            end
+            
+            % Rotated model output
+            S.model_rot.click_side = click_side;
+            S.model_rot.raw = raw;
+            S.model_rot.rot_max = rot_max;
+            S.model_rot.rot_elpctr = rot_elpctr;
+            S.model_rot.rot_elpctr_tilt = rot_elpctr_tilt;
+            
+            % Plot rotated bp using ellipse center
+            if flag_count<=length(trial_file_all) && flag_elps_fail~=1
+                if plot_opt_all_click
+                    figure(fig_clicks)
+                    subplot(numrow,4,flag_count);
+                    axesm(mstruct)
+                    contour(rot_elpctr_tilt.xq,rot_elpctr_tilt.yq,rot_elpctr_tilt.vq_norm,cvec,'fill','on');
+                    framem('fedgecolor',200*ones(1,3)/255,'flonlimit',[-180 180]);
+                    gridm('gcolor',190*ones(1,3)/255,'glinestyle','-');
+                    tightmap
+                    axis off
+                    title(sprintf('Call #%02d',str2double(ss{7}(2:3))));
+                    colormap(parula(length(cvec)-1));
+                    caxis([cvec(end), 0])
+                end
+            end
+
+            if flag_count==length(trial_file_all)
+                flag_trial = 0;
+                flag_count = 0;
+                if plot_opt_all_click
+                    figure(fig_clicks)
+                    suptitle(regexprep(sprintf('%s, %s, all clicks',script_name,t_name),'_','\\_'));
+                    saveSameSize(fig_clicks,'file',...
+                                 fullfile(save_path,sprintf('all_clicks_%s_%s.png',script_name,t_name)),...
+                                 'format','png','renderer','painters');
+                    close(fig_clicks)
+                end
+            end
+
+        end  % test if data.rot_max.E.x0-y0 are in the valid range for minvtran
 
         if save_opt==1
             save(fullfile(save_path,[save_fname,'.mat']),'-struct','S');
         end
 
-    end
+    end  % loop through all clicks
 
 end  % loop through all noise levels
 
