@@ -82,6 +82,8 @@ Move most BEM calculation results off from the gal-e server. Only keep the ones 
        * `model_bp_proj_RaColony_multifreq_20170921`: use the shift value from `...diffonly_20170921` to simulated model bp for 25:10:35 kHz.
        * `model_composite_RaColony3456_20170921`: assemble simulated model bp values from `..._multifreq_20170921` to reconstructed composite model bp.
        * the code above were executed in the order introduced.
+* Wrote `add_bpctr_to_composite_output` to add beam center locations into composite beam measurement files. The routines are from `fig_composite_click_avg_bp_20170920`. This is to facilitate plotting the beam center in various representations (e.g., avg_bp or cntr).
+
 * Now characterize the movement of multi-freq center in both measurements and models
 	* Compare composite clicks since the results are more stable, but note that the beam locations have been shifted based on the max beam location at 35 kHz
 
