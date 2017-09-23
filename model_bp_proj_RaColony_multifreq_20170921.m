@@ -52,14 +52,19 @@ freq_main = 35e3;  % freq used to make shift/rotation [Hz]
 freq_other = [25,45,55]*1e3;  % other freq in simulation [Hz]
 freq_all = [freq_main,freq_other];
 noise_mean = 0;  % added noise profile [dB]
-noise_std = 1;
+noise_std_all = [1,0,2];
 
 A.freq.main = freq_main;
 A.freq.other = freq_other;
 A.freq.all = freq_all;
 A.param.noise_mean = noise_mean;
-A.param.noise_std = noise_std;
 A.param.rng_seed = D.param.rng_seed;
+
+
+for iN=1:length(noise_std_all)
+
+noise_std = noise_std_all(iN);
+A.param.noise_std = noise_std;
 
 % Set up saving path
 [~,script_name,~] = fileparts(mfilename('fullpath'));
@@ -67,7 +72,6 @@ save_path = fullfile(data_base_path,results_path,sprintf('%s_std%2.1f',script_na
 if ~exist(save_path,'dir')
     mkdir(save_path);
 end
-
 
 % Seed randomization
 rng(D.param.rng_seed);  % seed the random number generator      
@@ -269,3 +273,5 @@ for iS=1:length(diff_file)
     end
 
 end % loop through all diff_file
+
+end % loop through all noise levels
