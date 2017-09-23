@@ -71,7 +71,7 @@ Move most BEM calculation results off from the gal-e server. Only keep the ones 
 * Found out there were some problems with the code `model_bp_proj_RaColony_20170921` so spent quite some time to fix it. Now it seems fixed. Look for commit today (2017/09/22).
 * Wrote a simple function `plot_bp_simple` to check interpolated beam pattern based on 1D or 2D data.
 * Wrote `model_bp_proj_RaColony_diffonly_20170921` which only finds the critical parameters necessary for producing Monte Carlo simulation results, but leave the actual simulation to another code. The parameters obtained by this code are for enabling multi-freq Monte Carlo simulation. Here, _diffonly_ refers to the differences in beam center in the model and measurements. This is the most important parameter to get the simulated projection working.
-* Revised `model_composite_RaColony3456_20170921` to work with the new model bp projection code `model_bp_proj_RaColony_diffonly_20170921`.
+* Wrote `model_bp_proj_RaColony_multifreq_20170921` which takes the output from `model_bp_proj_RaColony_diffonly_20170921` and simulate projected beam energy at mic locations at multiple frequencies. Need to revise `model_composite_RaColony3456_20170921` to work with output from this `...multifreq_20170921` code.
 
 * Now characterize the movement of multi-freq center in both measurements and models
 	* Compare composite clicks since the results are more stable, but note that the beam locations have been shifted based on the max beam location at 35 kHz
