@@ -1,6 +1,6 @@
 % 2016 08 08  Assemble composite clicks from simulated mic receptions
 % 2016 10 25  Update for version 1025 with out-of-bound points
-% 2017 09 21  Allow assembling composite clicks for multiple frequencies
+% 2017 09 23  Enable assembling composite click from multi-freq simulation
 
 clear
 
@@ -19,13 +19,12 @@ else
     model_base_path = 'F:\Dropbox\Z_wjlee\projects\rousettus_bp\bp_bem_modeling';
 end
 
-save_opt = 1;
-
 results_path = 'analysis_results_figs';
-simu_data_path = 'model_bp_proj_RaColony_diffonly_20170921';
+simu_data_path = 'model_bp_proj_RaColony_multifreq_20170921_std1.0';
 ss = strsplit(simu_data_path,'_');
-model_shape = ss{end-2};
-model_calc_date = ss{end};
+model_shape = ss{4};
+model_calc_date = ss{6};
+noise_std = ss{end};
 simu_file = dir(fullfile(data_base_path,results_path,simu_data_path,'*.mat'));
 
 [~,script_name,~] = fileparts(mfilename('fullpath'));
@@ -45,230 +44,218 @@ binsize = 10;  % bin size in azimuth and elevation
 A.param.composite_threshold = threshold;
 A.param.composite_binsize = binsize;
 
-% Load 1 file to get info
+% Load 1 file to get mtx sizes
 D = load(fullfile(data_base_path,results_path,simu_data_path,simu_file(1).name));  % rotated data
-num_ch = length(D.raw_meas_from_mic.az);
-A.param.map = D.map;
+num_ch = size(D.v_mic,1);
+num_freq = length(D.freq.all);
+
 A.param.num_ch = num_ch;
+A.param.map = D.map;
 
-freq_model_all = [25:10:55]*1e3;
-noise_mean = 0;  % added noise profile [dB]
-noise_std = 1;
+% Set save_fname
+save_fname = sprintf('%s_%s_bin%d_th%d',...
+    script_name,noise_std,binsize,threshold);
 
-for iF=1:length(freq_model_all)
-    
-    freq_model = freq_model_all(iF);
-    A.param.freq_model = freq_model;
-    
-    % Seed randomization
-    rng(D.param.rng_seed);  % seed the random number generator      
-    
-    % Set save_fname
-    ss_save = strsplit(D.BP.bp_model_file,'_');
-    tongue_loc_str = strtok(strjoin({ss_save{end-2:end}},'_'),'.');
+% Merge all data
+click_side_all = nan(length(simu_file),num_ch);
+az_elpctr_tilt_all = nan(length(simu_file),num_ch);
+el_elpctr_tilt_all = nan(length(simu_file),num_ch);
+call_dB_all = nan(length(simu_file),num_ch,length(D.freq.all));
+for iS=1:length(simu_file)
 
-    save_fname = sprintf('%s_noise%2.1f_%dkHz_%s_bin%d_th%d',...
-                         script_name,noise_std,freq_model/1e3,...
-                         tongue_loc_str,binsize,threshold);
+    D = load(fullfile(data_base_path,results_path,simu_data_path,simu_file(iS).name));  % rotated data
 
-    disp(sprintf('Simulating freq = %dkHz -----------------',freq_model/1e3));
-
-    % Load simulated beampattern at freq_model
-    sbp = strsplit(D.BP.bp_model_file,'_');
-    bp_model_file = strjoin([sbp(1:6),sprintf('%dkHz',freq_model/1e3),sbp(8:end)],'_');
-    BP = load(fullfile(model_base_path,D.BP.bp_model_path,bp_model_file));
-
-    % Fill values for each simulation files
-    click_side_all = nan(length(simu_file),num_ch);
-    az_all = nan(length(simu_file),num_ch);
-    el_all = nan(length(simu_file),num_ch);
-    call_dB_all = nan(length(simu_file),num_ch);
-    for iS=1:50%length(simu_file)
-
-        % Load partial simulation results
-        D = load(fullfile(data_base_path,results_path,simu_data_path, ...
-                          simu_file(iS).name));
-        disp(sprintf('file %03d: %s',iS,simu_file(iS).name));
-
-        % Load rotate measurement file
-        R = load(fullfile(data_base_path,results_path,D.param.rotate_data_path, ...
-                          D.param.rotate_data_file));
-        
-        % Simulation
-        click_side_all(iS,:) = D.raw_meas_from_mic.click_side*ones(1,length(num_ch));
-        if isempty(D.diff)  % if no simulated data available due to
-                            % issues with minvtran
-            az_all(iS,:) = nan(size(D.model_rot.raw.az));
-            el_all(iS,:) = nan(size(D.model_rot.raw.az));
-            call_dB_all(iS,:) = nan(size(D.model_rot.raw.az));
-        else
-            % Get beampattern model elq/azq
-            if D.raw_meas_from_mic.click_side==1  % right click --> no need to flip az
-                az_model = BP.az;
-            else   % left click --> need to flip az
-                az_model = -BP.az;
-            end
-            el_model = BP.el;
-            
-            % Rotate model bp according to el_diff/az_diff from 35 kHz
-            [el_model_rot,az_model_rot] = rotatem(el_model,az_model,...
-                                                  [D.diff.el,D.diff.az],...
-                                                  'inverse','degrees');
-
-            % Project model bp to mic loc
-            idxnotnan = ~isnan(BP.pp_plot);
-            v_mic = rbfinterp([D.raw_meas_from_mic.az(:)'/pi*180;D.raw_meas_from_mic.el(:)'/pi*180],...
-                              rbfcreate([az_model_rot(idxnotnan)';el_model_rot(idxnotnan)'],...
-                                        BP.pp_plot(idxnotnan)',...
-                                        'RBFFunction','multiquadrics'));
-
-            % Add noise
-            v_mic = v_mic+randn(size(v_mic))*noise_std+noise_mean;
-            v_mic = v_mic-max(v_mic);
-            
-            % Store all data
-            az_all(iS,:) = D.raw_meas_from_mic.az/pi*180;
-            el_all(iS,:) = D.raw_meas_from_mic.el/pi*180;
-            call_dB_all(iS,:) = v_mic;
-        end
+    % Merge all data
+    if isempty(D.rot_elpctr_tilt)
+        click_side_all(iS,:) = nan(1,num_ch);
+        az_elpctr_tilt_all(iS,:) = nan(1,num_ch);
+        el_elpctr_tilt_all(iS,:) = nan(1,num_ch);
+        call_dB_all(iS,:,:) = nan(num_ch,num_freq);
+    else
+        click_side_all(iS,:) = D.click_side*ones(1,length(num_ch));
+        az_elpctr_tilt_all(iS,:) = D.rot_elpctr_tilt.az;
+        el_elpctr_tilt_all(iS,:) = D.rot_elpctr_tilt.el;
+        call_dB_all(iS,:,:) = D.v_mic;
     end
-    A.click_side_all = click_side_all;
-    A.az_all = az_all;
-    A.el_all = el_all;
-    A.call_dB_all = call_dB_all;
 
-    % All data points for a single freq
-    call_dB_merge = reshape(call_dB_all,[],1);
-    click_side_merge = reshape(click_side_all,[],1);
-    az_merge = reshape(az_all,[],1);
-    el_merge = reshape(el_all,[],1);
+end
+A.click_side_all = click_side_all;
+A.az_elpctr_tilt_all = az_elpctr_tilt_all;
+A.el_elpctr_tilt_all = el_elpctr_tilt_all;
+A.call_dB_all = call_dB_all;
 
-    idx_right_good = find(click_side_merge==1 & ~isnan(call_dB_merge));
-    call_dB_right = call_dB_merge(idx_right_good);
-    az_right = az_all(idx_right_good);
-    el_right = el_all(idx_right_good);
+% All data points for a single freq
+click_side_merge = reshape(click_side_all,[],1);
+az_elpctr_tilt_merge = reshape(az_elpctr_tilt_all,[],1);
+el_elpctr_tilt_merge = reshape(el_elpctr_tilt_all,[],1);
+call_dB_merge = reshape(call_dB_all,[],4);
 
-    idx_left_good = find(click_side_merge==0 & ~isnan(call_dB_merge));
-    call_dB_left = call_dB_merge(idx_left_good);
-    az_left = az_all(idx_left_good);
-    el_left = el_all(idx_left_good);
+idx_right_good = find(click_side_merge==1 & ~isnan(call_dB_merge(:,1)));
+call_dB_right = call_dB_merge(idx_right_good,:);
+az_right = az_elpctr_tilt_all(idx_right_good);
+el_right = el_elpctr_tilt_all(idx_right_good);
 
-    % Interpolation using averaged data
-    [interp_avg_right,bin_avg_right] = ...
-        average_call(az_right,el_right,call_dB_right,...
-                     binsize,'eckert4',threshold);
-    [interp_avg_left,bin_avg_left] = ...
-        average_call(az_left,el_left,call_dB_left,...
-                     binsize,'eckert4',threshold);
+idx_left_good = find(click_side_merge==0 & ~isnan(call_dB_merge(:,1)));
+call_dB_left = call_dB_merge(idx_left_good,:);
+az_left = az_elpctr_tilt_all(idx_left_good);
+el_left = el_elpctr_tilt_all(idx_left_good);
 
-    % Plot params
-    suptitle_text = sprintf('%s, %2.1f, %s',model_shape,noise_std,...
-                            regexprep(bp_model_file,'_','\\_'));
-    cgrey = 200*ones(1,3)/255;
-    cvec=-30:3:0;
 
-    % Plot all scatter samples
-    fig_scatter = figure('position',[200,200,1200,450]);
 
-    subplot(121)  % left click
+% Interpolation using averaged data
+for iF=1:num_freq
+    fprintf('Merging freq %d kHz\n',D.freq.all(iF)/1e3);
+    [interp_avg_right(iF),bin_avg_right(iF)] = ...
+        average_call(az_right,el_right,call_dB_right(:,iF),binsize,'eckert4',threshold);
+    [interp_avg_left(iF),bin_avg_left(iF)] = ...
+        average_call(az_left,el_left,call_dB_left(:,iF),binsize,'eckert4',threshold);
+end
+
+
+% Save mat file
+save(fullfile(save_path,[save_fname,'.mat']),'-struct','A');
+
+
+
+% Plot params
+suptitle_str_pre = sprintf('%s %s',model_shape,noise_std);
+cgrey = 200*ones(1,3)/255;
+cvec=-30:3:0;
+
+
+% Plot all scatter samples at all freq
+fig_scatter = figure('position',[200,50,800,950]);
+
+for iFcount=1:num_freq
+    if iFcount==1  % swap 25 and 35 kHz locations
+        iF = 2;
+    elseif iFcount==2
+        iF = 1;
+    else
+        iF = iFcount;
+    end
+
+    fprintf('Plotting scatter at %d kHz\n',D.freq.all(iF)/1e3);
+
+    subplot(num_freq,2,(iFcount-1)*2+1)  % left click
     axesm(D.map.map_projection);
     gridm('gcolor',cgrey,'glinestyle','-');
     framem('fedgecolor',cgrey);
-    scatterm(el_left,az_left,15,call_dB_left,'filled')
-    title('Left click');
+    scatterm(el_left,az_left,15,call_dB_left(:,iF),'filled')
+    title(sprintf('%dkHz left',D.freq.all(iF)/1e3));
     tightmap
     axis off
     caxis(cvec([1 end]))
-    colorbar('location','southoutside');
+    %colorbar('location','eastoutside');
 
-    subplot(122)  % right click
+    subplot(num_freq,2,(iFcount-1)*2+2)  % right click
     axesm(D.map.map_projection);
     gridm('gcolor',cgrey,'glinestyle','-');
     framem('fedgecolor',cgrey);
-    scatterm(el_right,az_right,15,call_dB_right,'filled')
-    title('Right click');
+    scatterm(el_right,az_right,15,call_dB_right(:,iF),'filled')
+    title(sprintf('%dkHz right',D.freq.all(iF)/1e3));
     tightmap
     axis off
     caxis(cvec([1 end]))
-    colorbar('location','southoutside');
+    %colorbar('location','eastoutside');
+end
+
+figure(fig_scatter)
+saveSameSize(fig_scatter,'file',fullfile(save_path,[save_fname,'_scatter.png']),...
+             'format','png','renderer','painters');
+epswrite(fullfile(save_path,[save_fname,'_scatter.eps']));
 
 
-    % Plot model bp and reconstructed bp for comparison
-    [~,BP.vq_norm,BP.azq,BP.elq] = ...
-        interp_bp(BP.az(idxnotnan)/180*pi,BP.el(idxnotnan)/180*pi,BP.pp_plot(idxnotnan),'rbf');
-    BP.azq = BP.azq/pi*180;
-    BP.elq = BP.elq/pi*180;
-    [BP.xq,BP.yq] = mfwdtran(D.map.mstruct,BP.elq,BP.azq);
-    BP.vq_norm(BP.vq_norm<min(cvec)) = min(cvec);
+% Plot reconstructed bp at all freq
+fig_avg_bp_all = figure('position',[200,50,800,950]);
+
+for iFcount=1:num_freq
+    if iFcount==1  % swap 25 and 35 kHz locations
+        iF = 2;
+    elseif iFcount==2
+        iF = 1;
+    else
+        iF = iFcount;
+    end
+
+    fprintf('Plotting scatter at %d kHz\n',D.freq.all(iF)/1e3);
+
+    % left click
+    plot_bp_simple(subplot(num_freq,2,(iFcount-1)*2+1),...
+                   interp_avg_left(iF).azq_avg,interp_avg_left(iF).elq_avg,...
+                   interp_avg_left(iF).vq_norm_avg,'eckert4');
+    title('Reconstructed bp: left');
+    gridm('gcolor',cgrey,'glinestyle','-');
+    framem('fedgecolor',cgrey);
+    colorbar('Ticks',sort(cvec),'Ticklabels',{num2str(sort(cvec)')},...
+             'location','southoutside');
+
+    % right click
+    plot_bp_simple(subplot(num_freq,2,(iFcount-1)*2+2),...
+                   interp_avg_right(iF).azq_avg,interp_avg_right(iF).elq_avg,...
+                   interp_avg_right(iF).vq_norm_avg,'eckert4');
+    title('Reconstructed bp: right');
+    gridm('gcolor',cgrey,'glinestyle','-');
+    framem('fedgecolor',cgrey);
+    colorbar('Ticks',sort(cvec),'Ticklabels',{num2str(sort(cvec)')},...
+             'location','southoutside');
+end
+
+figure(fig_avg_bp_all)
+saveSameSize(fig_avg_bp_all,'file',fullfile(save_path,[save_fname,'_avg_bp_all.png']),...
+             'format','png','renderer','painters');
+epswrite(fullfile(save_path,[save_fname,'_avg_bp_all.eps']));
+
+
+
+% Plot model bp and reconstructed bp for comparison
+for iF = 1:num_freq
+
+    fprintf('Plotting reconstructed bp at %d kHz',D.freq.all(iF)/1e3);
 
     fig_bp_cmp = figure('position',[200,60,1200,900]);
 
-    subplot(221)    % model bp: left
-    axesm(D.map.map_projection);
-    contourf(-BP.xq,BP.yq,BP.vq_norm,cvec,'w');
+    % model bp: left
+    plot_bp_simple(subplot(221),-D.BP(iF).az,D.BP(iF).el,D.BP(iF).pp_plot, ...
+                   D.map.map_projection);
+    title('model: left');
     gridm('gcolor',cgrey,'glinestyle','-');
     framem('fedgecolor',cgrey);
-    title('Model bp: left');
-    tightmap
-    axis off
-    colormap(parula(length(cvec)-1))
-    caxis(cvec([1 end]))
     colorbar('Ticks',sort(cvec),'Ticklabels',{num2str(sort(cvec)')},...
              'location','southoutside');
 
-    subplot(222)    % model bp: right
-    axesm(D.map.map_projection);
-    contourf(BP.xq,BP.yq,BP.vq_norm,cvec,'w');
+    % model bp: right
+    plot_bp_simple(subplot(222),D.BP(iF).az,D.BP(iF).el,D.BP(iF).pp_plot, ...
+                   D.map.map_projection);
+    title('model: right');
     gridm('gcolor',cgrey,'glinestyle','-');
     framem('fedgecolor',cgrey);
-    title('Model bp: right');
-    tightmap
-    axis off
-    colormap(parula(length(cvec)-1))
-    caxis(cvec([1 end]))
     colorbar('Ticks',sort(cvec),'Ticklabels',{num2str(sort(cvec)')},...
              'location','southoutside');
 
-    subplot(223)   % reconstructed: left
-    axesm(D.map.map_projection);
-    gridm('gcolor',cgrey,'glinestyle','-');
-    framem('fedgecolor',cgrey);
-    contourfm(interp_avg_left.elq_avg,interp_avg_left.azq_avg,interp_avg_left.vq_norm_avg,cvec,'w');
+    % Reconstructed: left
+    plot_bp_simple(subplot(223),interp_avg_left(iF).azq_avg, ...
+                   interp_avg_left(iF).elq_avg,interp_avg_left(iF).vq_norm_avg,'eckert4');
     title('Reconstructed bp: left');
-    tightmap
-    axis off
-    colormap(parula(length(cvec)-1))
-    caxis(cvec([1 end]))
-    colorbar('Ticks',sort(cvec),'Ticklabels',{num2str(sort(cvec)')},...
-             'location','southoutside');
-
-    subplot(224)   % reconstructed: right
-    axesm(D.map.map_projection);
     gridm('gcolor',cgrey,'glinestyle','-');
     framem('fedgecolor',cgrey);
-    contourfm(interp_avg_right.elq_avg,interp_avg_right.azq_avg,interp_avg_right.vq_norm_avg,cvec,'w');
-    title('Reconstructed bp: right');
-    tightmap
-    axis off
-    colormap(parula(length(cvec)-1))
-    caxis(cvec([1 end]))
     colorbar('Ticks',sort(cvec),'Ticklabels',{num2str(sort(cvec)')},...
              'location','southoutside');
 
-    mtit(suptitle_text)
+    % Reconstructed: right
+    plot_bp_simple(subplot(224),interp_avg_right(iF).azq_avg, ...
+                   interp_avg_right(iF).elq_avg,interp_avg_right(iF).vq_norm_avg,'eckert4');
+    title('Reconstructed bp: right');
+    gridm('gcolor',cgrey,'glinestyle','-');
+    framem('fedgecolor',cgrey);
+    colorbar('Ticks',sort(cvec),'Ticklabels',{num2str(sort(cvec)')},...
+             'location','southoutside');
 
     % Save figure and mat file
-
-    figure(fig_scatter)
-    saveSameSize(fig_scatter,'file',fullfile(save_path,[save_fname,'_scatter.png']),...
-                 'format','png','renderer','painters');
-    epswrite(fullfile(save_path,[save_fname,'_scatter.eps']));
-
     figure(fig_bp_cmp)
-    saveSameSize(fig_bp_cmp,'file',fullfile(save_path,[save_fname,'_avg_bp.png']),...
+    sfname = sprintf('%s_avg_bp_%dkHz',save_fname,D.freq.all(iF)/1e3);
+    saveSameSize(fig_bp_cmp,'file',fullfile(save_path,[sfname,'.png']),...
                  'format','png','renderer','painters');
-    epswrite(fullfile(save_path,[save_fname,'_avg_bp.eps']));
+    epswrite(fullfile(save_path,[sfname,'.eps']));
 
-    save(fullfile(save_path,[save_fname,'.mat']),'-struct','A');
-
-end % loop through all freq
+end

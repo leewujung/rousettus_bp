@@ -39,6 +39,7 @@ model_shape = ss{end-2};
 model_calc_date = ss{end};
 diff_file = dir(fullfile(data_base_path,results_path,diff_data_path,'*.mat'));
 
+A.param.model_base_path = model_base_path;
 A.param.data_base_path = data_base_path;
 A.param.diff_data_path = diff_data_path;
 
@@ -126,6 +127,8 @@ for iS=1:length(diff_file)
         sbp = strsplit(D.BP.bp_model_file,'_');
         bp_model_file = strjoin([sbp(1:6),sprintf('%dkHz',freq_model/1e3),sbp(8:end)],'_');
         BP = load(fullfile(model_base_path,D.BP.bp_model_path,bp_model_file));
+        BP.bp_model_path = D.BP.bp_model_path;
+        BP.bp_model_file = bp_model_file;
         A.BP(iF) = BP;
 
         % Simulation -- need to do for all freq

@@ -37,7 +37,7 @@ axes(h)
 cla
 axesm(map_proj);
 gridm('gcolor',190*ones(1,3)/255,'glinestyle','-');
-framem('fedgecolor',190*ones(1,3)/255,'flonlimit',[-180 180]);
+framem('fedgecolor',200*ones(1,3)/255,'flonlimit',[-180 180]);
 axis off
 contourfm(elq,azq,vq,contour_vec(2:cvec_min_idx),...
           'fill','on','linecolor','w');  % don't plot 0 dB contour
