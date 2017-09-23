@@ -173,6 +173,14 @@ for iS=1:length(diff_file)
                 [click_side,raw,rot_max,rot_elpctr,rot_elpctr_tilt] = ...
                     shift_rotate_bp(D.raw_meas_from_mic.az,D.raw_meas_from_mic.el,...
                                     v_mic,'eckert4',D.param.iterative_shift_threshold);
+
+                % if the best-fitting ellipse for shift_max is outside of globe
+                % then don't plot
+                if isempty(rot_elpctr) || isempty(rot_elpctr_tilt)
+                    flag_elps_fail = 1;
+                else
+                    flag_elps_fail = 0;
+                end
                 
                 % Check az, el shift and tilt
                 if plot_opt_indiv_click==1
@@ -206,7 +214,7 @@ for iS=1:length(diff_file)
                 A.rot_elpctr_tilt = rot_elpctr_tilt;
                 
                 % Plot rotated bp using ellipse center
-                if flag_count<=length(trial_file_all)
+                if flag_count<=length(trial_file_all) && flag_elps_fail~=1
                     if plot_opt_all_click
                         figure(fig_clicks)
                         subplot(numrow,4,flag_count);
@@ -241,31 +249,33 @@ for iS=1:length(diff_file)
     end % loop through all freq
 
     % Plot to check all freq
-    fig_all_freq_proj = figure('position',[140 100 600 480]);
-    fig_all_freq_bp = figure('position',[140 100 600 480]);;
-    numrow = ceil(length(freq_all)/2);
-    for iF=1:length(freq_all)
+    if ~isempty(A.raw)
+        fig_all_freq_proj = figure('position',[140 100 600 480]);
+        fig_all_freq_bp = figure('position',[140 100 600 480]);;
+        numrow_all_freq = ceil(length(freq_all)/2);
+        for iF=1:length(freq_all)
+            figure(fig_all_freq_proj);
+            plot_bp_simple(subplot(numrow_all_freq,2,iF),A.raw.az,A.raw.el,A.v_mic(:,iF)', ...
+                           A.map.map_projection);
+            title(sprintf('%d kHz',freq_all(iF)/1e3));
+            figure(fig_all_freq_bp);
+            plot_bp_simple(subplot(numrow_all_freq,2,iF),A.BP(iF).az,A.BP(iF).el, ...
+                           A.BP(iF).pp_plot,A.map.map_projection);
+            title(sprintf('%d kHz',freq_all(iF)/1e3));
+        end
         figure(fig_all_freq_proj);
-        plot_bp_simple(subplot(numrow,2,iF),A.raw.az,A.raw.el,A.v_mic(:,iF)', ...
-                       A.map.map_projection);
-        title(sprintf('%d kHz',freq_all(iF)/1e3));
+        suptitle(regexprep(title_str,'_','\\_'));
+        saveSameSize_res(fig_all_freq_proj,120,'file',...
+                         fullfile(save_path,sprintf('%s_all_freq_proj.png',save_fname)),...
+                         'format','png','renderer','painters');
+        close(fig_all_freq_proj)
         figure(fig_all_freq_bp);
-        plot_bp_simple(subplot(numrow,2,iF),A.BP(iF).az,A.BP(iF).el, ...
-                       A.BP(iF).pp_plot,A.map.map_projection);
-        title(sprintf('%d kHz',freq_all(iF)/1e3));
+        suptitle(regexprep(title_str,'_','\\_'));
+        saveSameSize_res(fig_all_freq_bp,120,'file',...
+                         fullfile(save_path,sprintf('%s_all_freq_bp.png',save_fname)),...
+                         'format','png','renderer','painters');
+        close(fig_all_freq_bp)
     end
-    figure(fig_all_freq_proj);
-    suptitle(regexprep(title_str,'_','\\_'));
-    saveSameSize_res(fig_all_freq_proj,120,'file',...
-                 fullfile(save_path,sprintf('%s_all_freq_proj.png',save_fname)),...
-                 'format','png','renderer','painters');
-    close(fig_all_freq_proj)
-    figure(fig_all_freq_bp);
-    suptitle(regexprep(title_str,'_','\\_'));
-    saveSameSize_res(fig_all_freq_bp,120,'file',...
-                 fullfile(save_path,sprintf('%s_all_freq_bp.png',save_fname)),...
-                 'format','png','renderer','painters');
-    close(fig_all_freq_bp)
 
     % Save output
     if save_opt==1
