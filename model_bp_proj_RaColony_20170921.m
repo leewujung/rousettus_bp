@@ -39,8 +39,8 @@ rotate_data_path = 'rotate_all_click_2010308';  % rotation on 20170308, note
                                                 % the missing '7' in filename
 rng_seed = 168;
 bpctr_opt = 'ectr';  % 'max' -- max beam energy location
-                    % 'top' -- averaged loc for all normalized beam energy>-1
-                    % 'ectr' -- center of best-fitting ellipse
+                     % 'top' -- averaged loc for all normalized beam energy>-1
+                     % 'ectr' -- center of best-fitting ellipse
 
 rng(rng_seed);  % seed the random number generator
 
@@ -96,30 +96,25 @@ BP.elq = BP.elq/pi*180;
 % --- max beam energy location
 xx = BP.vq_norm(:);
 [~,mm_idx] = max(xx);
-max_elq_loc = BP.elq(mm_idx);
-max_azq_loc = BP.azq(mm_idx);
+BP.max.el = BP.elq(mm_idx);
+BP.max.az = BP.azq(mm_idx);
 % --- averaged location of normalized beam energy >-1
 xx(isnan(xx)) = -inf;
 [~,sort_idx] = sort(xx,'descend');
 ii = xx(sort_idx)>-1;
-top_elq_loc = mean(BP.elq(sort_idx(ii)));
-top_azq_loc = mean(BP.azq(sort_idx(ii)));
+BP.top.el = mean(BP.elq(sort_idx(ii)));
+BP.top.az = mean(BP.azq(sort_idx(ii)));
 % --- fit ellipse
 % ------- BP.el = bem_results.theta
 % ------- BP.az = bem_results.phi
 [raw,rot_max,rot_elpctr,rot_elpctr_tilt] = ...
     shift_rotate_bp_composite(BP.az,BP.el,BP.pp,map_proj,0.005);
 [el_ectr,az_ectr] = minvtran(mstruct,rot_max.E.x0,rot_max.E.y0);  % inverse map projection
-[el_ectr_r,az_ectr_r] = rotatem(el_ectr,az_ectr,...
-                                [max_elq_loc,max_azq_loc],...
+[BP.ectr.el,BP.ectr.az] = rotatem(el_ectr,az_ectr,...
+                                [BP.max.el,BP.max.az],...
                                 'inverse','degrees');
-BP.max_elq_loc = max_elq_loc;
-BP.max_azq_loc = max_azq_loc;
-BP.top_elq_loc = top_elq_loc;
-BP.top_azq_loc = top_azq_loc;
-BP.el_ectr_r = el_ectr_r;
-BP.az_ectr_r = az_ectr_r;
 S.BP = BP;
+
 
 
 %% Loop through all noise level
@@ -175,73 +170,60 @@ for iN=1:length(noise_std_all)
         % --- max beam energy point
         xx = data.raw.vq_norm(:);
         [~,mm_idx] = max(xx);
-        max_elq_loc = data.raw.elq(mm_idx);  % [deg]
-        max_azq_loc = data.raw.azq(mm_idx);
+        meas.max.el = data.raw.elq(mm_idx);  % [deg]
+        meas.max.az = data.raw.azq(mm_idx);
         % --- averaged location of point >-1 dB normalized beam energy
         xx(isnan(xx)) = -inf;
         [~,sort_idx] = sort(xx,'descend');
         ii = xx(sort_idx)>-1;
-        top_elq_loc = mean(data.raw.elq(sort_idx(ii)));  % [deg]
-        top_azq_loc = mean(data.raw.azq(sort_idx(ii)));
+        meas.top.el = mean(data.raw.elq(sort_idx(ii)));  % [deg]
+        meas.top.az = mean(data.raw.azq(sort_idx(ii)));
         % --- fit ellipse
         if isempty(data.rot_elpctr)  % if data.rot_max.E.x0-y0 are not within
                                      % valid minvtran range
-            S.data = [];
+            S.meas = [];
+            S.diff = [];
             S.model_rot = [];
 
         else
             [el_ectr,az_ectr] = minvtran(mstruct,data.rot_max.E.x0,...
                                          data.rot_max.E.y0);  % inverse map projection
-            [el_ectr_r,az_ectr_r] = rotatem(el_ectr,az_ectr,...  % [deg]
-                                            [max_elq_loc,max_azq_loc],...
+            [meas.ectr.el,meas.ectr.az] = rotatem(el_ectr,az_ectr,...  % [deg]
+                                            [meas.max.el,meas.max.az],...
                                             'inverse','degrees');
-            
-            % Model bp
-            if data.raw_meas.click_side==1  % right click --> no need to flip az
-                azq_model = BP.azq;
-                az_model = BP.az;
-                max_azq_loc_model = BP.max_azq_loc;
-                top_azq_loc_model = BP.top_azq_loc;
-                az_ectr_r_model = BP.az_ectr_r;
-            else   % left click
-                azq_model = -BP.azq;
-                az_model = -BP.az;
-                max_azq_loc_model = -BP.max_azq_loc;
-                top_azq_loc_model = -BP.top_azq_loc;
-                az_ectr_r_model = -BP.az_ectr_r;
-            end
-            elq_model = BP.elq;
-            el_model = BP.el;
-            max_elq_loc_model = max_elq_loc;
-            top_elq_loc_model = top_elq_loc;
-            el_ectr_r_model = el_ectr_r;
 
+            % Determine beam centr
             switch bpctr_opt
               case 'max'
-                el_diff = max_elq_loc-max_elq_loc_model;
-                az_diff = max_azq_loc-max_azq_loc_model;
+                bpctr_data = meas.max;
+                bpctr_model = BP.max;
               case 'top'
-                el_diff = top_elq_loc-top_elq_loc_model;
-                az_diff = top_azq_loc-top_azq_loc_model;
+                bpctr_data = meas.top;
+                bpctr_model = BP.top;
               case 'ectr'
-                el_diff = el_ectr_r-el_ectr_r_model;
-                az_diff = az_ectr_r-az_ectr_r_model;
+                bpctr_data = meas.ectr;
+                bpctr_model = BP.ectr;
             end
+
+            % Model bp
+            if data.raw_meas.click_side==1  % right click --> no need to flip az
+                az_model = BP.az;
+                diff.az = bpctr_data.az - bpctr_model.az;
+                diff.el = bpctr_data.el - bpctr_model.el;
+            else   % left click --> need to flip az, and therefore becomes
+                   % '+' to get diff.az and diff.el
+                az_model = -BP.az;
+                diff.az = bpctr_data.az + bpctr_model.az;
+                diff.el = bpctr_data.el + bpctr_model.el;
+            end
+            el_model = BP.el;
             
-            S.data.max_elq_loc = max_elq_loc;
-            S.data.max_azq_loc = max_azq_loc;
-            S.data.top_elq_loc = top_elq_loc;
-            S.data.top_azq_loc = top_azq_loc;
-            S.data.el_ectr_r = el_ectr_r;
-            S.data.az_ectr_r = az_ectr_r;
-            S.data.el_diff = el_diff;
-            S.data.az_diff = az_diff;
+            S.meas = meas;
+            S.diff = diff;
             
             % Rotate model bp according to max az/el
-            [elq_model_rot,azq_model_rot] = rotatem(elq_model,azq_model,...
-                                                    [el_diff,az_diff],'inverse','degrees');
             [el_model_rot,az_model_rot] = rotatem(el_model,az_model,...
-                                                  [el_diff,az_diff],'inverse','degrees');
+                                                  [diff.el,diff.az],'inverse','degrees');
             
             % Project model bp to mic loc
             idxnotnan = ~isnan(BP.pp_plot);

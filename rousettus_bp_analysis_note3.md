@@ -58,14 +58,20 @@ Move most BEM calculation results off from the gal-e server. Only keep the ones 
 		* `data`: beam center calculated from data
 		* `BP`: beam center calulated from beampattern model
 		* `model_rot`: rotation results from projected beampattern
-	
-	
-	
 * **NOTE** All simulated beampattern in the original submission (v10 of fig folders) used mouth array position '3456'.
 	* Considering using '2345' in the resubmission? The center of best-fitting ellipse and the averaged location for all points with normalized beam energy >-1 corresponds better to each other in '2345' scenario.
 * **NOTE re. source locations used by original submission**
 	*`model_bp_save_20161009` used a different numbering of sources that could cause confusion: used `SRC.idx_left([4,5,6,2]))` without the type of sorting used in `fig_model_steer_h_bpctr.m` now correct it to use the same type of sorting for source locations so that the code is more trackable --> but it turned out that model_bp_20161009 actually uses the source combination of '3456' correctly. Therefore results from `model_bp_proj_RaColony_20161025` used by the original submission were fine (indeed used sources '3456'.
 	* `model_bp_save_multiple_20161014` used the same ordering of source locations without sorting like in `model_bp_save_20161009`, therefore results from `model_bp_proj_RaColony_multiple_20161025` used by the original submission were fine.
+
+
+
+## 2017/09/22
+### Cont: Quantification of measured and modeled beampattern
+* Found out there were some problems with the code `model_bp_proj_RaColony_20170921` so spent quite some time to fix it. Now it seems fixed. Look for commit today (2017/09/22).
+* Wrote a simple function `plot_bp_simple` to check interpolated beam pattern based on 1D or 2D data.
+* Wrote `model_bp_proj_RaColony_diffonly_20170921` which only finds the critical parameters necessary for producing Monte Carlo simulation results, but leave the actual simulation to another code. The parameters obtained by this code are for enabling multi-freq Monte Carlo simulation. Here, _diffonly_ refers to the differences in beam center in the model and measurements. This is the most important parameter to get the simulated projection working.
+* Revised `model_composite_RaColony3456_20170921` to work with the new model bp projection code `model_bp_proj_RaColony_diffonly_20170921`.
 
 * Now characterize the movement of multi-freq center in both measurements and models
 	* Compare composite clicks since the results are more stable, but note that the beam locations have been shifted based on the max beam location at 35 kHz
