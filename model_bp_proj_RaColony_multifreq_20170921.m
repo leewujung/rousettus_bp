@@ -13,12 +13,14 @@ usrn = getenv('username');
 if isunix
     addpath('~/internal_2tb/Dropbox/0_CODE/MATLAB/rbfinterp_v1.2');
     addpath('~/internal_2tb/Dropbox/0_CODE/MATLAB/saveSameSize');
+    addpath('~/internal_2tb/Dropbox/0_CODE/MATLAB/EllipseDirectFit');
     data_base_path = '~/internal_2tb/Dropbox/Z_wjlee/projects/rousettus_bp';
     save_base_path = '~/internal_2tb/Dropbox/Z_wjlee/projects/rousettus_bp';
     model_base_path = '~/internal_2tb/Dropbox/Z_wjlee/projects/rousettus_bp/bp_bem_modeling/';
 else
     addpath('F:\Dropbox\0_CODE\MATLAB\rbfinterp_v1.2');
     addpath('F:\Dropbox\0_CODE\MATLAB\saveSameSize');
+    addpath('F:\Dropbox\0_CODE\MATLAB\EllipseDirectFit');
     data_base_path = 'F:\Dropbox\Z_wjlee\projects\rousettus_bp';
     save_base_path = 'F:\Dropbox\Z_wjlee\projects\rousettus_bp';
     model_base_path = 'F:\Dropbox\Z_wjlee\projects\rousettus_bp\bp_bem_modeling';
@@ -46,10 +48,15 @@ num_ch = length(D.raw_meas_from_mic.az);
 A.map = D.map;
 A.param.num_ch = num_ch;
 
-freq_model_all = [25:10:55]*1e3;
+freq_main = 35e3;  % freq used to make shift/rotation [Hz]
+freq_other = [25,45,55]*1e3;  % other freq in simulation [Hz]
+freq_all = [freq_main,freq_other];
 noise_mean = 0;  % added noise profile [dB]
 noise_std = 1;
 
+A.freq.main = freq_main;
+A.freq.other = freq_other;
+A.freq.all = freq_all;
 A.param.noise_mean = noise_mean;
 A.param.noise_std = noise_std;
 A.param.rng_seed = D.param.rng_seed;
@@ -65,66 +72,62 @@ end
 % Seed randomization
 rng(D.param.rng_seed);  % seed the random number generator      
 
-for iF=1:length(freq_model_all)
+% Loop through all files
+flag_trial = 0;
+flag_count = 0;
+for iS=1:length(diff_file)
+
+    ss = strsplit(strtok(diff_file(iS).name,'.'),'_');
+    ss2 = strsplit(script_name,'_');
+    save_fname = strjoin([script_name,sprintf('std%2.1f',noise_std), ...
+                        ss(end-2:end)],'_');
+    title_str = sprintf('%s %dkHz noise std=%2.1f %s',...
+                        ss2{4},freq_all(1)/1e3,noise_std,strjoin([ss(end-2:end)],'_'));
     
-    freq_model = freq_model_all(iF);
-    A.param.freq_model = freq_model;
+    % Load partial simulation results
+    D = load(fullfile(data_base_path,results_path,diff_data_path, ...
+                      diff_file(iS).name));
+    disp(sprintf('file %03d: %s',iS,diff_file(iS).name));
+
+    % Load rotate measurement file --> for checking/debugging
+    %R = load(fullfile(data_base_path,results_path,D.param.rotate_data_path, ...
+    %                  D.param.rotate_data_file));
     
+    A.param.diff_data_file = diff_file(iS).name;
+
+    % Set up figures
+    if ~flag_trial
+        t_name = strjoin(ss(7:8),'_');
+        trial_file_all = dir(fullfile(data_base_path,...
+                                      results_path,diff_data_path,['*_',t_name,'_*.mat']));
+        flag_trial = 1;
+    end
     
-    disp(sprintf('Simulating freq = %dkHz',freq_model/1e3));
+    if flag_count<length(trial_file_all)
+        flag_count = flag_count+1;
+    end
+    
+    if plot_opt_all_click && flag_count==1
+        numrow = ceil(length(trial_file_all)/4);
+        fig_clicks = figure;
+        set(fig_clicks,'Position',[100 100 1400 240*numrow]);
+    end
+    
+    for iF=1:length(freq_all)
+        
+        freq_model = freq_all(iF);
+        disp(sprintf('Simulating freq = %dkHz',freq_model/1e3));
 
-    % Load simulated beampattern at freq_model
-    sbp = strsplit(D.BP.bp_model_file,'_');
-    bp_model_file = strjoin([sbp(1:6),sprintf('%dkHz',freq_model/1e3),sbp(8:end)],'_');
-    BP = load(fullfile(model_base_path,D.BP.bp_model_path,bp_model_file));
-    A.BP = BP;
+        % Load simulated beampattern at freq_model
+        sbp = strsplit(D.BP.bp_model_file,'_');
+        bp_model_file = strjoin([sbp(1:6),sprintf('%dkHz',freq_model/1e3),sbp(8:end)],'_');
+        BP = load(fullfile(model_base_path,D.BP.bp_model_path,bp_model_file));
+        A.BP(iF) = BP;
 
-    % Loop through all files
-    flag_trial = 0;
-    flag_count = 0;
-    for iS=1:length(diff_file)
-
-        ss = strsplit(strtok(diff_file(iS).name,'.'),'_');
-        ss2 = strsplit(script_name,'_');
-        save_fname = strjoin([script_name,sprintf('%dkHz_std%2.1f',freq_model/1e3,noise_std), ...
-                            ss(end-2:end)],'_');
-        title_str = strjoin([ss2(4:6),sprintf('%dkHz_std%2.1f',freq_model/ ...
-                                              1e3,noise_std),ss(end-2:end)],'_');
-        
-        
-        % Load partial simulation results
-        D = load(fullfile(data_base_path,results_path,diff_data_path, ...
-                          diff_file(iS).name));
-        disp(sprintf('file %03d: %s',iS,diff_file(iS).name));
-
-        % Load rotate measurement file --> for checking/debugging
-        %R = load(fullfile(data_base_path,results_path,D.param.rotate_data_path, ...
-        %                  D.param.rotate_data_file));
-        
-        A.param.diff_data_file = diff_file(iS).name;
-
-        % Set up figures
-        if ~flag_trial
-            t_name = strjoin(ss(7:8),'_');
-            trial_file_all = dir(fullfile(data_base_path,...
-                                          results_path,diff_data_path,['*_',t_name,'_*.mat']));
-            flag_trial = 1;
-        end
-        
-        if flag_count<length(trial_file_all)
-            flag_count = flag_count+1;
-        end
-        
-        if plot_opt_all_click && flag_count==1
-            numrow = ceil(length(trial_file_all)/4);
-            fig_clicks = figure;
-            set(fig_clicks,'Position',[100 100 1400 240*numrow]);
-        end
-        
-        % Simulation
+        % Simulation -- need to do for all freq
         if isempty(D.diff)  % if simulated data not available due to invalid
                             % minvtran values in raw measurements
-            
+            A.v_mic = [];
             A.click_side = [];
             A.raw = [];
             A.rot_max = [];
@@ -155,81 +158,114 @@ for iF=1:length(freq_model_all)
             % Add noise
             v_mic = v_mic+randn(size(v_mic))*noise_std+noise_mean;
             v_mic = v_mic-max(v_mic);
-            
-            % Fit ellipse
-            [click_side,raw,rot_max,rot_elpctr,rot_elpctr_tilt] = ...
-                shift_rotate_bp(D.raw_meas_from_mic.az,D.raw_meas_from_mic.el,...
-                                v_mic,'eckert4',D.param.iterative_shift_threshold);
-            
-            % Check az, el shift and tilt
-            if plot_opt_indiv_click==1
-                Vpass.raw = raw;
-                Vpass.rot_max = rot_max;
-                Vpass.rot_elpctr = rot_elpctr;
-                Vpass.rot_elpctr_tilt = rot_elpctr_tilt;
-                
-                % Movement of [az,el] of each mic
-                fig_azel = plot_indiv_click_azel_movement(Vpass);
-                title(regexprep(title_str,'_','\\_'));
-                saveSameSize(fig_azel,'file',...
-                             fullfile(save_path,sprintf('%s_azel_chk.png',save_fname)),...
-                             'format','png','renderer','painters');
-                close(fig_azel)
-                
-                % Plot the shift/tilt procedure
-                fig_fit = plot_indiv_click_rotate(Vpass,cvec,D.map.mstruct);
-                suptitle(regexprep(title_str,'_','\\_'));
-                saveSameSize(fig_fit,'file',...
-                             fullfile(save_path,sprintf('%s_contour.png',save_fname)),...
-                             'format','png','renderer','painters');
-                close(fig_fit)
-            end
-            
-            % Rotated model output
-            A.click_side = click_side;
-            A.raw = raw;
-            A.rot_max = rot_max;
-            A.rot_elpctr = rot_elpctr;
-            A.rot_elpctr_tilt = rot_elpctr_tilt;
-            
-            % Plot rotated bp using ellipse center
-            if flag_count<=length(trial_file_all)
-                if plot_opt_all_click
-                    figure(fig_clicks)
-                    subplot(numrow,4,flag_count);
-                    axesm(D.map.mstruct)
-                    contour(rot_elpctr_tilt.xq,rot_elpctr_tilt.yq,rot_elpctr_tilt.vq_norm,cvec,'fill','on');
-                    framem('fedgecolor',200*ones(1,3)/255,'flonlimit',[-180 180]);
-                    gridm('gcolor',190*ones(1,3)/255,'glinestyle','-');
-                    tightmap
-                    axis off
-                    title(sprintf('Call #%02d',str2double(ss{end}(2:3))));
-                    colormap(parula(length(cvec)-1));
-                    caxis([cvec(end), 0])
-                end
-            end
 
-            if flag_count==length(trial_file_all)
-                flag_trial = 0;
-                flag_count = 0;
-                if plot_opt_all_click
-                    figure(fig_clicks)
-                    suptitle(regexprep(sprintf('%s, %s, all clicks',script_name,t_name),'_','\\_'));
-                    saveSameSize(fig_clicks,'file',...
-                                 fullfile(save_path,sprintf('all_clicks_%s_%s.png',script_name,t_name)),...
+            A.v_mic(:,iF) = v_mic;  % save simulated mic recording
+
+
+            % Only do shift/rotation at the first freq (35 kHz)
+            if iF==1
+
+                % Fit ellipse
+                [click_side,raw,rot_max,rot_elpctr,rot_elpctr_tilt] = ...
+                    shift_rotate_bp(D.raw_meas_from_mic.az,D.raw_meas_from_mic.el,...
+                                    v_mic,'eckert4',D.param.iterative_shift_threshold);
+                
+                % Check az, el shift and tilt
+                if plot_opt_indiv_click==1
+                    Vpass.raw = raw;
+                    Vpass.rot_max = rot_max;
+                    Vpass.rot_elpctr = rot_elpctr;
+                    Vpass.rot_elpctr_tilt = rot_elpctr_tilt;
+                    
+                    % Movement of [az,el] of each mic
+                    fig_azel = plot_indiv_click_azel_movement(Vpass);
+                    title(regexprep(title_str,'_','\\_'));
+                    saveSameSize_res(fig_azel,120,'file',...
+                                 fullfile(save_path,sprintf('%s_azel_chk.png',save_fname)),...
                                  'format','png','renderer','painters');
-                    close(fig_clicks)
+                    close(fig_azel)
+                    
+                    % Plot the shift/tilt procedure
+                    fig_fit = plot_indiv_click_rotate(Vpass,cvec,D.map.mstruct);
+                    suptitle(regexprep(title_str,'_','\\_'));
+                    saveSameSize_res(fig_fit,120,'file',...
+                                 fullfile(save_path,sprintf('%s_contour.png',save_fname)),...
+                                 'format','png','renderer','painters');
+                    close(fig_fit)
                 end
-            end
+                
+                % Rotated model output
+                A.click_side = click_side;
+                A.raw = raw;
+                A.rot_max = rot_max;
+                A.rot_elpctr = rot_elpctr;
+                A.rot_elpctr_tilt = rot_elpctr_tilt;
+                
+                % Plot rotated bp using ellipse center
+                if flag_count<=length(trial_file_all)
+                    if plot_opt_all_click
+                        figure(fig_clicks)
+                        subplot(numrow,4,flag_count);
+                        axesm(D.map.mstruct)
+                        contour(rot_elpctr_tilt.xq,rot_elpctr_tilt.yq,rot_elpctr_tilt.vq_norm,cvec,'fill','on');
+                        framem('fedgecolor',200*ones(1,3)/255,'flonlimit',[-180 180]);
+                        gridm('gcolor',190*ones(1,3)/255,'glinestyle','-');
+                        tightmap
+                        axis off
+                        title(sprintf('Call #%02d',str2double(ss{end}(2:3))));
+                        colormap(parula(length(cvec)-1));
+                        caxis([cvec(end), 0])
+                    end
+                end
 
+                if flag_count==length(trial_file_all)
+                    flag_trial = 0;
+                    flag_count = 0;
+                    if plot_opt_all_click
+                        figure(fig_clicks)
+                        suptitle(regexprep(sprintf('%s, %s, all clicks',script_name,t_name),'_','\\_'));
+                        saveSameSize_res(fig_clicks,120,'file',...
+                                     fullfile(save_path,sprintf('all_clicks_%s_%s.png',script_name,t_name)),...
+                                     'format','png','renderer','painters');
+                        close(fig_clicks)
+                    end
+                end
+            end  % if at first freq
             
         end  % if values invalid for minvtran in raw measurement ellipse fitting
 
-        if save_opt==1
-            save(fullfile(save_path,[save_fname,'.mat']),'-struct','A');
-        end
+    end % loop through all freq
 
-        
-    end % loop through all diff_file
+    % Plot to check all freq
+    fig_all_freq_proj = figure('position',[140 100 600 480]);
+    fig_all_freq_bp = figure('position',[140 100 600 480]);;
+    numrow = ceil(length(freq_all)/2);
+    for iF=1:length(freq_all)
+        figure(fig_all_freq_proj);
+        plot_bp_simple(subplot(numrow,2,iF),A.raw.az,A.raw.el,A.v_mic(:,iF)', ...
+                       A.map.map_projection);
+        title(sprintf('%d kHz',freq_all(iF)/1e3));
+        figure(fig_all_freq_bp);
+        plot_bp_simple(subplot(numrow,2,iF),A.BP(iF).az,A.BP(iF).el, ...
+                       A.BP(iF).pp_plot,A.map.map_projection);
+        title(sprintf('%d kHz',freq_all(iF)/1e3));
+    end
+    figure(fig_all_freq_proj);
+    suptitle(regexprep(title_str,'_','\\_'));
+    saveSameSize_res(fig_all_freq_proj,120,'file',...
+                 fullfile(save_path,sprintf('%s_all_freq_proj.png',save_fname)),...
+                 'format','png','renderer','painters');
+    close(fig_all_freq_proj)
+    figure(fig_all_freq_bp);
+    suptitle(regexprep(title_str,'_','\\_'));
+    saveSameSize_res(fig_all_freq_bp,120,'file',...
+                 fullfile(save_path,sprintf('%s_all_freq_bp.png',save_fname)),...
+                 'format','png','renderer','painters');
+    close(fig_all_freq_bp)
 
-end % loop through all freq
+    % Save output
+    if save_opt==1
+        save(fullfile(save_path,[save_fname,'.mat']),'-struct','A');
+    end
+
+end % loop through all diff_file
