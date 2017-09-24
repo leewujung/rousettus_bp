@@ -56,54 +56,6 @@ for iF=2:2:num_freq
     %contour_vec = 0:-1:(floor(vq_norm_min/3)-1)*3;
     cvec_min_idx = find(contour_vec-vq_norm_min<0,1,'first');
 
-    % Find max beam energy point
-    % --- left composite click
-    xx = averaged_composite.left.interp(iF).vq_norm_avg(:);
-    [left_max_val,left_max_idx] = max(xx);
-    left_max_el = averaged_composite.left.interp(iF).elq_avg(left_max_idx);
-    left_max_az = averaged_composite.left.interp(iF).azq_avg(left_max_idx);
-    xx(isnan(xx)) = -inf;
-    [~,left_sort_idx] = sort(xx,'descend');
-    ii = xx(left_sort_idx)>-1;
-    left_top_el = mean(averaged_composite.left.interp(iF).elq_avg(left_sort_idx(ii)));
-    left_top_az = mean(averaged_composite.left.interp(iF).azq_avg(left_sort_idx(ii)));
-    % --- right composite click
-    xx = averaged_composite.right.interp(iF).vq_norm_avg(:);
-    [right_max_val,right_max_idx] = max(xx);
-    right_max_el = averaged_composite.right.interp(iF).elq_avg(right_max_idx);
-    right_max_az = averaged_composite.right.interp(iF).azq_avg(right_max_idx);
-    xx(isnan(xx)) = -inf;
-    [~,right_sort_idx] = sort(xx,'descend');
-    ii = xx(right_sort_idx)>-1;
-    right_top_el = mean(averaged_composite.right.interp(iF).elq_avg(right_sort_idx(ii)));
-    right_top_az = mean(averaged_composite.right.interp(iF).azq_avg(right_sort_idx(ii)));
-
-    % Fit ellipse
-    map_proj = 'eckert4';
-    mstruct = defaultm(map_proj);
-    mstruct = defaultm(mstruct);
-    % --- left composite click
-    [left_raw,left_rot_max,left_rot_elpctr,left_rot_elpctr_tilt] = ...
-        shift_rotate_bp_composite(averaged_composite.left.bin(iF).az_avg,...
-                                  averaged_composite.left.bin(iF).el_avg,...
-                                  averaged_composite.left.bin(iF).avg_call_dB,...
-                                  map_proj,0.005);
-    [left_el_ectr,left_az_ectr] = minvtran(mstruct,left_rot_max.E.x0,left_rot_max.E.y0);  % inverse map projection
-    [left_el_ectr_r,left_az_ectr_r] = rotatem(left_el_ectr,left_az_ectr,...
-                                    [left_max_el,left_max_az],...
-                                    'inverse','degrees');
-    % --- right composite click
-    [right_raw,right_rot_max,right_rot_elpctr,right_rot_elpctr_tilt] = ...
-        shift_rotate_bp_composite(averaged_composite.right.bin(iF).az_avg,...
-                                  averaged_composite.right.bin(iF).el_avg,...
-                                  averaged_composite.right.bin(iF).avg_call_dB,...
-                                  map_proj,0.005);
-    [right_el_ectr,right_az_ectr] = minvtran(mstruct,right_rot_max.E.x0,right_rot_max.E.y0);  % inverse map projection
-    [right_el_ectr_r,right_az_ectr_r] = rotatem(right_el_ectr,right_az_ectr,...
-                                    [right_max_el,right_max_az],...
-                                    'inverse','degrees');
-
-    
     % Plot left click
     figure
     axesm eckert4
@@ -117,13 +69,13 @@ for iF=2:2:num_freq
         'fill','on','linecolor','w');  % don't plot 0 dB contour
     
     % Plot max beam energy point
-    plotm(left_max_el,left_max_az,'rx','markersize',8,'linewidth',2)
+    plotm(bpctr{iF}.left.max.el,bpctr{iF}.left.max.az,'rx','markersize',8,'linewidth',2)
 
     % Plot dB>-1 beam energy point
-    plotm(left_top_el,left_top_az,'r^','markersize',8,'linewidth',2)
+    plotm(bpctr{iF}.left.top.el,bpctr{iF}.left.top.az,'r^','markersize',8,'linewidth',2)
 
     % location of center of best-fitting ellipse
-    plotm(left_el_ectr_r,left_az_ectr_r,'ro','markersize',8,'linewidth',2)
+    plotm(bpctr{iF}.left.ectr.el,bpctr{iF}.left.ectr.az,'ro','markersize',8,'linewidth',2)
 
     colorbar('southoutside','ticks',fliplr(contour_vec(1:cvec_min_idx)));
     colormap(parula(cvec_min_idx-1));
@@ -151,14 +103,15 @@ for iF=2:2:num_freq
         averaged_composite.right.interp(iF).vq_norm_avg,...
         contour_vec(2:cvec_min_idx),...
         'fill','on','linecolor','w');  % don't plot 0 dB contour
+
     % Plot max beam energy point
-    plotm(right_max_el,right_max_az,'rx','markersize',8,'linewidth',2)
+    plotm(bpctr{iF}.right.max.el,bpctr{iF}.right.max.az,'rx','markersize',8,'linewidth',2)
 
     % Plot dB>-1 beam energy point
-    plotm(right_top_el,right_top_az,'r^','markersize',8,'linewidth',2)
+    plotm(bpctr{iF}.right.top.el,bpctr{iF}.right.top.az,'r^','markersize',8,'linewidth',2)
 
     % location of center of best-fitting ellipse
-    plotm(right_el_ectr_r,right_az_ectr_r,'ro','markersize',8,'linewidth',2)
+    plotm(bpctr{iF}.right.ectr.el,bpctr{iF}.right.ectr.az,'ro','markersize',8,'linewidth',2)
 
     colorbar('southoutside','ticks',fliplr(contour_vec(1:cvec_min_idx)));
     colormap(parula(cvec_min_idx-1));
