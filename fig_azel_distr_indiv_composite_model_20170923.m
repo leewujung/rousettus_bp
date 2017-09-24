@@ -198,3 +198,4 @@ saveSameSize_res(fig_ar,150,'file',fullfile(save_path,[save_fname,'_elaz.png']),
 epswrite(fullfile(save_path,[save_fname,'_elaz.eps']));
 
 
+
