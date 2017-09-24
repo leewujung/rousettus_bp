@@ -50,10 +50,10 @@ A.map = D.map;
 A.param.num_ch = num_ch;
 
 freq_main = 35e3;  % freq used to make shift/rotation [Hz]
-freq_other = [20,25,30,40,45,50,55]*1e3;  % other freq in simulation [Hz]
+freq_other = [20:5:30,40:5:60]*1e3;  % other freq in simulation [Hz]
 freq_all = [freq_main,freq_other];
 noise_mean = 0;  % added noise profile [dB]
-noise_std_all = [1,0];
+noise_std_all = [1,0,2];
 
 A.freq.main = freq_main;
 A.freq.other = freq_other;
