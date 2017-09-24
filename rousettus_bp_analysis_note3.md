@@ -84,6 +84,7 @@ Move most BEM calculation results off from the gal-e server. Only keep the ones 
        * the code above were executed in the order introduced.
 * Wrote `add_bpctr_to_composite_output` to add beam center locations into composite beam measurement files. The routines are from `fig_composite_click_avg_bp_20170920`. This is to facilitate plotting the beam center in various representations (e.g., avg_bp or cntr).
 * Compare the aspect ratio (el/az of best-fitting ellipse) between data and the phased array and piston model. Code is `fig_azel_distr_indiv_composite_model_20170923`. In here can see that the distributions of aspect ratio for the data and the phased array model are very similar:
+
 	<img src=./img/fig_azel_distr_indiv_composite_model_20170923_batall_bin10_th0_nstd1.0_scatter.png width="300">    <img src=./img/fig_azel_distr_indiv_composite_model_20170923_batall_bin10_th0_nstd1.0_ar.png width="400">
 
 
@@ -91,6 +92,13 @@ Move most BEM calculation results off from the gal-e server. Only keep the ones 
 ## 2017/09/24
 ### Cont: Quantification of measured and modeled beampattern
 * Need to re-run multi-freq model bp simulation code (`model_composite_RaColony3456_20170921.m`) because forgot to 60 kHz in the batch yesterday. The whole evaluated frequency range should be 20:5:60 kHz.
+* Updated `model_composite_RaColony3456_20170921` to include getting -3dB contours and beam center for all frequencies. Different from the plotting routines for composite measured clicks, here all plots for model composite clicks are done in this code.
+
+* Tasks today:
+       * individual and composite model click multi-freq ellipse fitting
+       * individual and composite measured click multi-freq ellipse fitting
+       * compare stats of the above
+       * Run `model_composite_RaColony3456_20170921` once Monte Carlo simulation is done for noise_std=1.0
 
 * **NOTE** The `multifreq_composite_click_***_20170308` series of code starts by `multifreq_composite_click_20170308` and then calculate other related attributes, including `..._avg_bp` (beampattern for average click), `..._cntr` (multi-freq contour for average click), and `..._fit_elps` (fitting ellipse to -3dB contour at 35 kHz).
 
