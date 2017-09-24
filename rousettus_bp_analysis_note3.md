@@ -84,8 +84,7 @@ Move most BEM calculation results off from the gal-e server. Only keep the ones 
        * the code above were executed in the order introduced.
 * Wrote `add_bpctr_to_composite_output` to add beam center locations into composite beam measurement files. The routines are from `fig_composite_click_avg_bp_20170920`. This is to facilitate plotting the beam center in various representations (e.g., avg_bp or cntr).
 * Compare the aspect ratio (el/az of best-fitting ellipse) between data and the phased array and piston model. Code is `fig_azel_distr_indiv_composite_model_20170923`. In here can see that the distributions of aspect ratio for the data and the phased array model are very similar:
-	<img src=./img/fig_azel_distr_indiv_composite_model_20170923_batall_bin10_th0_nstd1.0_scatter.png width="300">
-	<img src=./img/fig_azel_distr_indiv_composite_model_20170923_batall_bin10_th0_nstd1.0_ar.png width="400">
+	<img src=./img/fig_azel_distr_indiv_composite_model_20170923_batall_bin10_th0_nstd1.0_scatter.png width="300">    <img src=./img/fig_azel_distr_indiv_composite_model_20170923_batall_bin10_th0_nstd1.0_ar.png width="400">
 
 
 
