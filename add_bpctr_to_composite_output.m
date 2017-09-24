@@ -94,7 +94,7 @@ for iF=1:num_freq
 
 end
 
-save(fullfile(data_base_path,data_path,results_path,data_file),'-struct','D');
+save(fullfile(data_base_path,results_path,data_path,data_file),'-struct','D');
 
 
 
