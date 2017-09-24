@@ -8,6 +8,7 @@
 %             the composite modeled clicks
 
 clear
+warning off
 
 usrn = getenv('username');
 if isunix
@@ -253,17 +254,22 @@ for iS=1:length(diff_file)
 
     % Plot to check all freq
     if ~isempty(A.raw)
-        fig_all_freq_proj = figure('position',[140 100 600 480]);
-        fig_all_freq_bp = figure('position',[140 100 600 480]);;
-        numrow_all_freq = ceil(length(freq_all)/2);
+        fig_all_freq_proj = figure('position',[100 100 900 650]);
+        fig_all_freq_bp = figure('position',[100 100 900 650]);;
+        numrow_all_freq = ceil(length(freq_all)/3);
         for iF=1:length(freq_all)
             figure(fig_all_freq_proj);
-            plot_bp_simple(subplot(numrow_all_freq,2,iF),A.raw.az,A.raw.el,A.v_mic(:,iF)', ...
+            plot_bp_simple(subplot(numrow_all_freq,3,iF),A.raw.az,A.raw.el,A.v_mic(:,iF)', ...
                            A.map.map_projection);
             title(sprintf('%d kHz',freq_all(iF)/1e3));
             figure(fig_all_freq_bp);
-            plot_bp_simple(subplot(numrow_all_freq,2,iF),A.BP(iF).az,A.BP(iF).el, ...
-                           A.BP(iF).pp_plot,A.map.map_projection);
+            if D.raw_meas_from_mic.click_side==1  % right click --> no need to flip az
+                plot_bp_simple(subplot(numrow_all_freq,3,iF),A.BP(iF).az,A.BP(iF).el, ...
+                               A.BP(iF).pp_plot,A.map.map_projection);
+            else   % left click --> need to flip az
+                plot_bp_simple(subplot(numrow_all_freq,3,iF),-A.BP(iF).az,A.BP(iF).el, ...
+                               A.BP(iF).pp_plot,A.map.map_projection);
+            end
             title(sprintf('%d kHz',freq_all(iF)/1e3));
         end
         figure(fig_all_freq_proj);
@@ -288,3 +294,6 @@ for iS=1:length(diff_file)
 end % loop through all diff_file
 
 end % loop through all noise levels
+
+
+warning on
