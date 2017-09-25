@@ -40,6 +40,7 @@ num_ch = size(D.v_mic,1);
 [xxx,yyy] = mfwdtran(D.map.mstruct,[0,0,-90,90],[-180,180,0,0]);
 xy_lim = [xxx(1:2), yyy(3:4)];
 num_freq = length(D.freq.all);
+num_freq_plot = num_freq-2;
 
 A.param.num_ch = num_ch;
 A.map = D.map;
@@ -47,7 +48,7 @@ A.map = D.map;
 
 % Set plotting params
 contour_sm_len = 10;
-colorset = jet(num_freq);
+colorset = jet(num_freq_plot);
 cgrey = 200*ones(1,3)/255;
 
 
@@ -64,7 +65,7 @@ save_fname = script_name;
 
 
 % Compile data from all clicks
-for iS=1:5%length(data_file)
+for iS=1:length(data_file)
     fprintf('file %03d: %s\n',iS,data_file(iS).name);
     D = load(fullfile(data_base_path,results_path,...
                       data_path,data_file(iS).name));  % rotated data
@@ -118,8 +119,8 @@ for iS=1:5%length(data_file)
                 bpctr(iS,iF).ectr_az = [];
             else            
                 [el_ectr,az_ectr] = minvtran(D.map.mstruct,rot_max.E.x0,rot_max.E.y0);  % inverse map projection
-            [bpctr(iS,iF).ectr_el,bpctr(iS,iF).ectr_az] = rotatem(el_ectr,az_ectr,...
-                                                              [bpctr(iS,iF).max_el,bpctr(iS,iF).max_az]/pi*180,...
+                [bpctr(iS,iF).ectr_el,bpctr(iS,iF).ectr_az] = rotatem(el_ectr,az_ectr,...
+                                     [bpctr(iS,iF).max_el,bpctr(iS,iF).max_az],...
                                                               'inverse','degrees');
             end
         end
@@ -133,10 +134,8 @@ A.rot_n = rot_n;
 
 
 % Save results
-if save_opt==1
-    save_fname = [script_name,'_results.mat'];
-    save(fullfile(save_path,save_fname),'-struct','A');
-end
+save_fname = [script_name,'_results.mat'];
+save(fullfile(save_path,save_fname),'-struct','A');
 
 
 
@@ -150,7 +149,6 @@ for iB=1:3
       case 3
         bpctr_opt = 'ectr';
     end
-    num_freq_plot = num_freq-2;
     fig_bpctr = figure('position',[100,100,1100,700]);
 
     for ii=1:4
@@ -162,8 +160,10 @@ for iB=1:3
         hold on
     end
 
+    cnt = 0;
     for iF=freqI(2:num_freq-1)  % 25:5:55 kHz, need to use sorted freq sequence
-        for iS=1:5%length(data_file)
+        cnt = cnt+1;
+        for iS=1:length(data_file)
             % bpctr
             if click_side(iS)==1
                 subplot(222);
@@ -174,13 +174,13 @@ for iB=1:3
                 switch bpctr_opt
                   case 'max'
                     plotm(bpctr(iS,iF).max_el,bpctr(iS,iF).max_az,'.','markersize',8,...
-                          'linewidth',2,'color',colorset(iF-1,:));
+                          'linewidth',2,'color',colorset(cnt,:));
                   case 'top'
                     plotm(bpctr(iS,iF).top_el,bpctr(iS,iF).top_az,'.','markersize',8,...
-                          'linewidth',2,'color',colorset(iF-1,:));
+                          'linewidth',2,'color',colorset(cnt,:));
                   case 'ectr'
                     plotm(bpctr(iS,iF).ectr_el,bpctr(iS,iF).ectr_az,'.','markersize',8,...
-                          'linewidth',2,'color',colorset(iF-1,:));
+                          'linewidth',2,'color',colorset(cnt,:));
                 end
             end
             % -3dB contours
@@ -193,7 +193,7 @@ for iB=1:3
             xy_sm(:,1) = smooth(xy(:,1),contour_sm_len);
             xy_sm(:,2) = smooth(xy(:,2),contour_sm_len);
             xy_sm(isnan(xy(:,1)),:) = NaN;
-            plot(xy_sm(:,1),xy_sm(:,2),'linewidth',0.5,'color',colorset(iF,:));
+            plot(xy_sm(:,1),xy_sm(:,2),'linewidth',0.5,'color',colorset(cnt,:));
             clear xy_sm
         end
     end
@@ -202,14 +202,14 @@ for iB=1:3
         tightmap
         colormap(jet(num_freq_plot))
         colorbar('Ticks',linspace(0+1/num_freq_plot/2,1-1/num_freq_plot/2,num_freq_plot),...
-                 'TickLabels',{num2str(freq_wanted(2:end-1)'/1e3)},'location','southoutside');
+                 'TickLabels',{num2str(D.freq.all(freqI(2:end-1))'/1e3)},'location','southoutside');
         grid
     end
 
 
     % Save figures
-    saveas(fig,fullfile(save_path,sprintf('%s_%s.fig',save_fname,bpctr_opt)),'fig');
-    saveSameSize_res(fig,150,'file',fullfile(save_path,sprintf('%s_%s.png',save_fname,bpctr_opt)),...
+    saveas(fig_bpctr,fullfile(save_path,sprintf('%s_%s.fig',save_fname,bpctr_opt)),'fig');
+    saveSameSize_res(fig_bpctr,150,'file',fullfile(save_path,sprintf('%s_%s.png',save_fname,bpctr_opt)),...
                      'format','png','renderer','painters');
     epswrite(fullfile(save_path,sprintf('%s_%s.eps',save_fname,bpctr_opt)));
 

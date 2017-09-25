@@ -27,8 +27,9 @@ bat_proc_fpre = 'rousettus_20150825';
 freq_wanted = (20:5:60)*1e3;
 bat_num = 'all';  % all,34271,36134,39184
 num_freq = length(freq_wanted);
+num_freq_plot = num_freq-2;
 contour_sm_len = 10;
-colorset = jet(num_freq);
+colorset = jet(num_freq-2);
 cgrey = 200*ones(1,3)/255;
 
 A.param.freq_wanted = freq_wanted;
@@ -137,7 +138,7 @@ for iS=1:length(data_file)
             else            
                 [el_ectr,az_ectr] = minvtran(D.map.mstruct,rot_max.E.x0,rot_max.E.y0);  % inverse map projection
                 [bpctr(iS,iF).ectr_el,bpctr(iS,iF).ectr_az] = rotatem(el_ectr,az_ectr,...
-                                     [bpctr(iS,iF).max_el,bpctr(iS,iF).max_az]/pi*180,...
+                                     [bpctr(iS,iF).max_el,bpctr(iS,iF).max_az],...
                                                                   'inverse','degrees');
             end
         end
@@ -150,11 +151,10 @@ A.click_side = click_side;
 A.rot_n = rot_n;
 
 
+
 % Save results
-if save_opt==1
-    save_fname = [script_name,'_results.mat'];
-    save(fullfile(save_path,save_fname),'-struct','A');
-end
+save_fname = [script_name,'_results.mat'];
+save(fullfile(save_path,save_fname),'-struct','A');
 
 
 
@@ -182,7 +182,7 @@ for iB=1:3
 
     for iF=2:num_freq-1  % 25:5:55 kHz
         for iS=1:length(data_file)
-                   % bpctr
+            % bpctr
             if click_side(iS)==1
                 subplot(222);
             else
@@ -209,10 +209,11 @@ for iB=1:3
             xy_sm(:,1) = smooth(xy(:,1),contour_sm_len);
             xy_sm(:,2) = smooth(xy(:,2),contour_sm_len);
             xy_sm(isnan(xy(:,1)),:) = NaN;
-            plot(xy_sm(:,1),xy_sm(:,2),'linewidth',0.5,'color',colorset(iF,:));
+            plot(xy_sm(:,1),xy_sm(:,2),'linewidth',0.5,'color',colorset(iF-1,:));
             clear xy_sm
         end
     end
+
     for ii=1:4
         subplot(2,2,ii);
         tightmap

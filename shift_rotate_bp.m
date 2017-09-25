@@ -36,7 +36,6 @@ el = el/pi*180;
 azq = azq/pi*180;
 elq = elq/pi*180;
 
-
 % Rotate measurements to use max position as origin
 [~,mmidx] = max(vq_norm(:));
 origin_max = [elq(mmidx),azq(mmidx)];  % [Lat Lon]
