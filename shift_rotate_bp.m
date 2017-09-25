@@ -36,6 +36,7 @@ el = el/pi*180;
 azq = azq/pi*180;
 elq = elq/pi*180;
 
+
 % Rotate measurements to use max position as origin
 [~,mmidx] = max(vq_norm(:));
 origin_max = [elq(mmidx),azq(mmidx)];  % [Lat Lon]
@@ -87,7 +88,7 @@ if E_max.x0<xy_lim(1) || E_max.x0>xy_lim(2) ||...
    E_max.y0<xy_lim(3) || E_max.y0>xy_lim(4)
     shift_elpctr = [];
     shift_elpctr_tilt = [];
-    varargout{1} = NaN;
+    varargout{1} = 0;
     return;
 end
 
@@ -113,6 +114,7 @@ while sqrt(E1.x0^2+E1.y0^2)>it_shift_th && n<2000
             real(E1.y0)<xy_lim(3) || real(E1.y0)>xy_lim(4)
         shift_elpctr = [];
         shift_elpctr_tilt = [];
+        varargout{1} = NaN;
         return;
     else
         [origin1(1),origin1(2)] = ...
