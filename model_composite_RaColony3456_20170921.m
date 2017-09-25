@@ -217,18 +217,14 @@ contour_sm_len = 10;
 % Plot all scatter samples at all freq
 fig_scatter = figure('position',[200,50,800,950]);
 
-for iFcount=1:num_freq
-    if iFcount==1  % swap 25 and 35 kHz locations
-        iF = 2;
-    elseif iFcount==2
-        iF = 1;
-    else
-        iF = iFcount;
-    end
+[~,I] = sort(D.freq.all);
+cnt = 0;
+for iF=I
+    cnt = cnt+1;
 
     fprintf('Plotting scatter at %d kHz\n',D.freq.all(iF)/1e3);
 
-    subplot(num_freq,2,(iFcount-1)*2+1)  % left click
+    subplot(num_freq,2,(cnt-1)*2+1)  % left click
     axesm(D.map.map_projection);
     gridm('gcolor',cgrey,'glinestyle','-');
     framem('fedgecolor',cgrey);
@@ -239,7 +235,7 @@ for iFcount=1:num_freq
     caxis(cvec([1 end]))
     %colorbar('location','eastoutside');
 
-    subplot(num_freq,2,(iFcount-1)*2+2)  % right click
+    subplot(num_freq,2,(cnt-1)*2+2)  % right click
     axesm(D.map.map_projection);
     gridm('gcolor',cgrey,'glinestyle','-');
     framem('fedgecolor',cgrey);
@@ -257,39 +253,36 @@ saveSameSize(fig_scatter,'file',fullfile(save_path,[save_fname,'_scatter.png']),
 epswrite(fullfile(save_path,[save_fname,'_scatter.eps']));
 
 
+
 % Plot reconstructed bp at all freq
 fig_avg_bp_all = figure('position',[200,50,800,950]);
 
-for iFcount=1:num_freq
-    if iFcount==1  % swap 25 and 35 kHz locations
-        iF = 2;
-    elseif iFcount==2
-        iF = 1;
-    else
-        iF = iFcount;
-    end
+[~,I] = sort(D.freq.all);
+cnt = 0;
+for iF=I
+    cnt = cnt+1;
 
     fprintf('Plotting scatter at %d kHz\n',D.freq.all(iF)/1e3);
 
     % left click
-    plot_bp_simple(subplot(num_freq,2,(iFcount-1)*2+1),...
+    plot_bp_simple(subplot(num_freq,2,(cnt-1)*2+1),...
                    interp_avg_left(iF).azq_avg,interp_avg_left(iF).elq_avg,...
-                   interp_avg_left(iF).vq_norm_avg,'eckert4');
-    title('Reconstructed bp: left');
+                   interp_avg_left(iF).vq_norm_avg,'eckert4',0);
+    title(sprintf('%dkHz left',D.freq.all(iF)/1e3));
     gridm('gcolor',cgrey,'glinestyle','-');
     framem('fedgecolor',cgrey);
     colorbar('Ticks',sort(cvec),'Ticklabels',{num2str(sort(cvec)')},...
-             'location','southoutside');
+             'location','eastoutside');
 
     % right click
-    plot_bp_simple(subplot(num_freq,2,(iFcount-1)*2+2),...
+    plot_bp_simple(subplot(num_freq,2,(cnt-1)*2+2),...
                    interp_avg_right(iF).azq_avg,interp_avg_right(iF).elq_avg,...
-                   interp_avg_right(iF).vq_norm_avg,'eckert4');
-    title('Reconstructed bp: right');
+                   interp_avg_right(iF).vq_norm_avg,'eckert4',0);
+    title(sprintf('%dkHz right',D.freq.all(iF)/1e3));
     gridm('gcolor',cgrey,'glinestyle','-');
     framem('fedgecolor',cgrey);
     colorbar('Ticks',sort(cvec),'Ticklabels',{num2str(sort(cvec)')},...
-             'location','southoutside');
+             'location','eastoutside');
 end
 
 figure(fig_avg_bp_all)
@@ -354,97 +347,107 @@ end
 
 
 % Plot multi-freq -3dB contours
-bpctr_opt = 'ectr';
+for iB=1:3
+    switch iB
+      case 1
+        bpctr_opt = 'max';
+      case 2
+        bpctr_opt = 'top';
+      case 3
+        bpctr_opt = 'ectr';
+    end
 
-fig_left = figure;
-axesm eckert4
-axis off
-framem('fedgecolor',cgrey,'flonlimit',[-180 180]);
-gridm('gcolor',cgrey,'glinestyle','-');
-hold on
+    fig_left = figure;
+    axesm eckert4
+    axis off
+    framem('fedgecolor',cgrey,'flonlimit',[-180 180]);
+    gridm('gcolor',cgrey,'glinestyle','-');
+    hold on
 
-fig_right = figure;
-axesm eckert4
-axis off
-framem('fedgecolor',cgrey,'flonlimit',[-180 180]);
-gridm('gcolor',cgrey,'glinestyle','-');
-hold on
+    fig_right = figure;
+    axesm eckert4
+    axis off
+    framem('fedgecolor',cgrey,'flonlimit',[-180 180]);
+    gridm('gcolor',cgrey,'glinestyle','-');
+    hold on
 
-[~,I] = sort(D.freq.all);
-cnt = 0;
-for iF = I(2:end-1)  % from 25 to 55 kHz
-    cnt = cnt+1;
+    [~,I] = sort(D.freq.all);
+    cnt = 0;
+    for iF = I(2:end-1)  % from 25 to 55 kHz
+        cnt = cnt+1;
 
-    % Get contours
-    xy_sm_left(:,1) = smooth(c3db_xy_all_left{iF}(:,1),contour_sm_len);
-    xy_sm_left(:,2) = smooth(c3db_xy_all_left{iF}(:,2),contour_sm_len);
-    xy_sm_left(isnan(xy_sm_left(:,1)),:) = NaN;
-    
-    xy_sm_right(:,1) = smooth(c3db_xy_all_right{iF}(:,1),contour_sm_len);
-    xy_sm_right(:,2) = smooth(c3db_xy_all_right{iF}(:,2),contour_sm_len);
-    xy_sm_right(isnan(xy_sm_right(:,1)),:) = NaN;
+        % Get contours
+        xy_sm_left(:,1) = smooth(c3db_xy_all_left{iF}(:,1),contour_sm_len);
+        xy_sm_left(:,2) = smooth(c3db_xy_all_left{iF}(:,2),contour_sm_len);
+        xy_sm_left(isnan(xy_sm_left(:,1)),:) = NaN;
+        
+        xy_sm_right(:,1) = smooth(c3db_xy_all_right{iF}(:,1),contour_sm_len);
+        xy_sm_right(:,2) = smooth(c3db_xy_all_right{iF}(:,2),contour_sm_len);
+        xy_sm_right(isnan(xy_sm_right(:,1)),:) = NaN;
 
-    % Left click
+        % Left click
+        figure(fig_left)
+        % --- -3dB contour
+        plot(xy_sm_left(:,1),xy_sm_left(:,2),'linewidth',3,'color',colorset(cnt,:));
+        switch bpctr_opt
+          case 'max'  % Plot max beam energy point
+            plotm(left(iF).max.el,left(iF).max.az,'x','markersize', ...
+                  8,'linewidth',2,'color',colorset(cnt,:));
+          case 'top'  % Plot dB>-1 beam energy point
+            plotm(left(iF).top.el,left(iF).top.az,'^','markersize', ...
+                  8,'linewidth',2,'color',colorset(cnt,:));
+          case 'ectr' % location of center of best-fitting ellipse
+            plotm(left(iF).ectr.el,left(iF).ectr.az,'o', ...
+                  'markersize',8,'linewidth',2,'color',colorset(cnt,:));
+        end
+
+        % Right click
+        figure(fig_right)
+        % --- -3dB contour
+        plot(xy_sm_right(:,1),xy_sm_right(:,2),'linewidth',3,'color',colorset(cnt,:));
+        switch bpctr_opt
+          case 'max'  % Plot max beam energy point
+            plotm(right(iF).max.el,right(iF).max.az,'x','markersize', ...
+                  8,'linewidth',2,'color',colorset(cnt,:));
+          case 'top'  % Plot dB>-1 beam energy point
+            plotm(right(iF).top.el,right(iF).top.az,'^','markersize', ...
+                  8,'linewidth',2,'color',colorset(cnt,:));
+          case 'ectr' % location of center of best-fitting ellipse
+            plotm(right(iF).ectr.el,right(iF).ectr.az,'o', ...
+                  'markersize',8,'linewidth',2,'color',colorset(cnt,:));
+        end
+        
+        clear xy_sm_*
+    end
+
+
     figure(fig_left)
-    % --- -3dB contour
-    plot(xy_sm_left(:,1),xy_sm_left(:,2),'linewidth',3,'color',colorset(cnt,:));
-    switch bpctr_opt
-      case 'max'  % Plot max beam energy point
-        plotm(left(iF).max.el,left(iF).max.az,'x','markersize', ...
-              8,'linewidth',2,'color',colorset(cnt,:));
-      case 'top'  % Plot dB>-1 beam energy point
-        plotm(left(iF).top.el,left(iF).top.az,'^','markersize', ...
-              8,'linewidth',2,'color',colorset(cnt,:));
-      case 'ectr' % location of center of best-fitting ellipse
-        plotm(left(iF).ectr.el,left(iF).ectr.az,'o', ...
-              'markersize',8,'linewidth',2,'color',colorset(cnt,:));
-    end
+    colormap(jet(num_freq_plot))
+    colorbar('Ticks',linspace(0+1/num_freq_plot/2,1-1/num_freq_plot/2,num_freq_plot),...
+             'TickLabels',{num2str(D.freq.all(I(2:end-1))'/1e3)},'location','southoutside');
+    grid
+    tightmap
+    title('Averaged left click');
 
-    % Right click
+    sfname = sprintf('%s_cntr_left_%s',save_fname,bpctr_opt);
+    saveas(fig_left,fullfile(save_path,[sfname,'.fig']),'fig');
+    saveSameSize_res(fig_left,150,'file',fullfile(save_path,[sfname,'.png']),...
+                     'format','png','renderer','painters');
+    epswrite(fullfile(save_path,[sfname,'.eps']));
+
+
     figure(fig_right)
-    % --- -3dB contour
-    plot(xy_sm_right(:,1),xy_sm_right(:,2),'linewidth',3,'color',colorset(cnt,:));
-    switch bpctr_opt
-      case 'max'  % Plot max beam energy point
-        plotm(right(iF).max.el,right(iF).max.az,'x','markersize', ...
-              8,'linewidth',2,'color',colorset(cnt,:));
-      case 'top'  % Plot dB>-1 beam energy point
-        plotm(right(iF).top.el,right(iF).top.az,'^','markersize', ...
-              8,'linewidth',2,'color',colorset(cnt,:));
-      case 'ectr' % location of center of best-fitting ellipse
-        plotm(right(iF).ectr.el,right(iF).ectr.az,'o', ...
-              'markersize',8,'linewidth',2,'color',colorset(cnt,:));
-    end
-    
-    clear xy_sm_*
-end
+    colormap(jet(num_freq_plot))
+    colorbar('Ticks',linspace(0+1/num_freq_plot/2,1-1/num_freq_plot/2,num_freq_plot),...
+             'TickLabels',{num2str(D.freq.all(I(2:end-1))'/1e3)},'location','southoutside');
+    grid
+    tightmap
+    title('Averaged right click');
 
+    sfname = sprintf('%s_cntr_right_%s',save_fname,bpctr_opt);
+    saveas(fig_right,fullfile(save_path,[sfname,'.fig']),'fig');
+    saveSameSize_res(fig_right,150,'file',fullfile(save_path,[sfname,'.png']),...
+                     'format','png','renderer','painters');
+    epswrite(fullfile(save_path,[sfname,'.eps']));
 
-figure(fig_left)
-colormap(jet(num_freq_plot))
-colorbar('Ticks',linspace(0+1/num_freq_plot/2,1-1/num_freq_plot/2,num_freq_plot),...
-    'TickLabels',{num2str(D.freq.all(I(2:end-1))'/1e3)},'location','southoutside');
-grid
-tightmap
-title('Averaged left click');
-
-sfname = sprintf('%s_cntr_left_%s',save_fname,bpctr_opt);
-saveas(fig_left,fullfile(save_path,[sfname,'.fig']),'fig');
-saveSameSize_res(fig_left,150,'file',fullfile(save_path,[sfname,'.png']),...
-                 'format','png','renderer','painters');
-epswrite(fullfile(save_path,[sfname,'.eps']));
-
-
-figure(fig_right)
-colormap(jet(num_freq_plot))
-colorbar('Ticks',linspace(0+1/num_freq_plot/2,1-1/num_freq_plot/2,num_freq_plot),...
-    'TickLabels',{num2str(D.freq.all(I(2:end-1))'/1e3)},'location','southoutside');
-grid
-tightmap
-title('Averaged right click');
-
-sfname = sprintf('%s_cntr_right_%s',save_fname,bpctr_opt);
-saveas(fig_right,fullfile(save_path,[sfname,'.fig']),'fig');
-saveSameSize_res(fig_right,150,'file',fullfile(save_path,[sfname,'.png']),...
-                 'format','png','renderer','painters');
-epswrite(fullfile(save_path,[sfname,'.eps']));
+end  % all 3 types of bpctr

@@ -1,13 +1,20 @@
-function h = plot_bp_simple(h,az,el,v,map_proj)
+function h = plot_bp_simple(h,az,el,v,map_proj,varargin)
 % Utility function to plot beampattern on a globe.
 % If az/el are 1D, apply interpolation on v to obtain contourf numbers.
 % If az/el are 2D, directly plot using numbers in v.
 % Both az and el have unit [deg]
+% varargin{1} is whether or not to plot colorbar: 1-yes, 0-no
 %
 % Wu-Jung Lee | leewujung@gmail.com
 % 2015 11 04  Test rotating max amplitude point to middle of az-el plane
 % 2015 11 20  Use new format in call_dB selection
 % 2017 09 21  Morph from plot_bp_on_globe.m
+
+if ~isempty(varargin)
+    opt = varargin{1};
+else
+    opt = 1;
+end
 
 vq_norm_min = -27;
 contour_vec = 0:-3:(floor(vq_norm_min/3)-1)*3;
@@ -41,8 +48,9 @@ framem('fedgecolor',200*ones(1,3)/255,'flonlimit',[-180 180]);
 axis off
 contourfm(elq,azq,vq,contour_vec(2:cvec_min_idx),...
           'fill','on','linecolor','w');  % don't plot 0 dB contour
-
-colorbar('southoutside','ticks',fliplr(contour_vec(1:cvec_min_idx)));
+if opt==1
+    colorbar('southoutside','ticks',fliplr(contour_vec(1:cvec_min_idx)));
+end
 colormap(parula(cvec_min_idx-1));
 caxis([contour_vec(cvec_min_idx) 0]);
 tightmap
