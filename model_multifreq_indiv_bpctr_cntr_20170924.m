@@ -128,6 +128,16 @@ for iS=1:length(data_file)
             end
         end
     end  % all freq
+
+    if mod(iS,10)==0  % save results everything 10 files
+        A.bpctr = bpctr;
+        A.c3db_xy_freq = c3db_xy_freq;
+        A.click_side = click_side;
+        A.rot_n = rot_n;
+        save_fname = sprintf('%s_tilfile%03d_.mat',save_fname,iS);
+        save(fullfile(save_path,save_fname),'-struct','A');
+    end
+
 end  % all click files
 
 A.bpctr = bpctr;
@@ -137,7 +147,7 @@ A.rot_n = rot_n;
 
 
 % Save results
-save_fname = [script_name,'_results.mat'];
+save_fname = [save_fname,'_results.mat'];
 save(fullfile(save_path,save_fname),'-struct','A');
 
 
