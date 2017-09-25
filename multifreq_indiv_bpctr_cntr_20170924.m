@@ -96,6 +96,9 @@ for iS=1:length(data_file)
         call_dB_norm = call_dB - max(call_dB);  % normalize
 
         % interpolate for particular frequency --> rotated locations
+        if isempty(D.rot_elpctr_tilt)
+            continue;
+        end
         [~,vq_norm,azq,elq] = interp_bp(D.rot_elpctr_tilt.az/180*pi, ...
                                         D.rot_elpctr_tilt.el/180*pi,call_dB,'rbf');
         azq = azq/pi*180;

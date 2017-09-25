@@ -78,6 +78,9 @@ for iS=1:length(data_file)
         % NOTE: D.v_mic has already been normalized
 
         % interpolate for particular frequency --> rotated locations
+        if isempty(D.rot_elpctr_tilt)
+            continue
+        end
         [~,vq_norm,azq,elq] = interp_bp(D.rot_elpctr_tilt.az/180*pi, ...
                                         D.rot_elpctr_tilt.el/180*pi,D.v_mic(:,iF),'rbf');
         azq = azq/pi*180;
@@ -85,12 +88,12 @@ for iS=1:length(data_file)
 
         % Get -3dB contour
         [azq_grid,elq_grid,vq_grid] = get_ortho_grid_azel(azq,elq,vq_norm);
-        [~,c_level_nan] = get_main_contour(vq_grid,unique(azq_grid(:)),unique(elq_grid(:)),-3);
+        [~,c_level_nan] = get_main_contour(vq_grid,unique(azq_grid(:)), ...
+                                                   unique(elq_grid(:)),-3);
+        c3db_xy = [];
         [c3db_xy(:,1),c3db_xy(:,2)] = ...
             mfwdtran(D.map.mstruct,c_level_nan(:,2),c_level_nan(:,1));  % [az,el] to [x,y]
-
         c3db_xy_freq{iS,iF} = c3db_xy;
-        clear c3db_xy
         
         % Find beam center --> rotated locations (using azq/elq from above)
         % --- max beam energy point
