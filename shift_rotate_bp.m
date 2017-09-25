@@ -1,4 +1,4 @@
-function [click_side,raw,shift_max,shift_elpctr,shift_elpctr_tilt] = ...
+function [click_side,raw,shift_max,shift_elpctr,shift_elpctr_tilt,varargout] = ...
         shift_rotate_bp(az,el,call_dB,map_proj,it_shift_th)
 % Shift beampattern according to the center of the best-fitting ellipse and
 % compensate for the ellipse rotation
@@ -10,7 +10,9 @@ function [click_side,raw,shift_max,shift_elpctr,shift_elpctr_tilt] = ...
 %   map_proj   map projection to use, 'ortho' or 'eckert4'
 %   it_shift_th  threshold for iterative shift ellipse center
 %   azel_bnd     bound for az-el shift
-
+% OUTPUT
+%   varargout{}  n: number of rotation needed
+%
 % Wu-Jung Lee | leewujung@gmail.com
 % 2016 04 19  deal with the "rotate out-of-bound" problem
 %             move plotting routine outside of the function to rotate_all_click.m
@@ -85,6 +87,7 @@ if E_max.x0<xy_lim(1) || E_max.x0>xy_lim(2) ||...
    E_max.y0<xy_lim(3) || E_max.y0>xy_lim(4)
     shift_elpctr = [];
     shift_elpctr_tilt = [];
+    varargout{1} = NaN;
     return;
 end
 
@@ -105,7 +108,7 @@ M1.vq_norm = vq_norm;
 M1.call_dB = call_dB;
 
 % it_shift_th = 0.005;
-while sqrt(E1.x0^2+E1.y0^2)>it_shift_th
+while sqrt(E1.x0^2+E1.y0^2)>it_shift_th && n<2000
     if real(E1.x0)<xy_lim(1) || real(E1.x0)>xy_lim(2) ||...
             real(E1.y0)<xy_lim(3) || real(E1.y0)>xy_lim(4)
         shift_elpctr = [];
@@ -122,6 +125,7 @@ while sqrt(E1.x0^2+E1.y0^2)>it_shift_th
         E1 = bp_fit_ellipse_azel(M1,mstruct);
     end
 end
+varargout{1} = n;
 fprintf('Rotate original measurements %d times\n',n);
 x_ecen = M1.x;
 y_ecen = M1.y;
