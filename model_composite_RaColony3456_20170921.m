@@ -62,7 +62,7 @@ click_side_all = nan(length(simu_file),num_ch);
 az_elpctr_tilt_all = nan(length(simu_file),num_ch);
 el_elpctr_tilt_all = nan(length(simu_file),num_ch);
 call_dB_all = nan(length(simu_file),num_ch,length(D.freq.all));
-for iS=1:50%length(simu_file)
+for iS=1:length(simu_file)
 
     D = load(fullfile(data_base_path,results_path,simu_data_path,simu_file(iS).name));  % rotated data
 
