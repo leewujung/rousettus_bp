@@ -1,4 +1,5 @@
 function [azq,elq,vq] = get_ortho_grid_azel(azq,elq,vq)
+% azq/elq [deg]
 
 idx_notnan = ~isnan(azq);  % index of non-NaN data
 azq = azq(idx_notnan);
