@@ -71,7 +71,11 @@ for iS=1:length(data_file)
                       data_path,data_file(iS).name));  % rotated data
 
     % Record click direction
-    click_side(iS) = D.click_side;
+    if isempty(D.click_side)
+        click_side(iS) = NaN;
+    else
+        click_side(iS) = D.click_side;
+    end
 
     for iF=1:num_freq
 
@@ -79,6 +83,14 @@ for iS=1:length(data_file)
 
         % interpolate for particular frequency --> rotated locations
         if isempty(D.rot_elpctr_tilt)
+            c3db_xy_freq{iS,iF} = [NaN,NaN];
+            bpctr(iS,iF).max_el = NaN;
+            bpctr(iS,iF).max_az = NaN;
+            bpctr(iS,iF).top_el = NaN;
+            bpctr(iS,iF).top_az = NaN;
+            bpctr(iS,iF).ectr_el = NaN;
+            bpctr(iS,iF).ectr_az = NaN;
+            rot_n(iS,iF) = NaN;
             continue
         end
         [~,vq_norm,azq,elq] = interp_bp(D.rot_elpctr_tilt.az/180*pi, ...
@@ -134,8 +146,8 @@ for iS=1:length(data_file)
         A.c3db_xy_freq = c3db_xy_freq;
         A.click_side = click_side;
         A.rot_n = rot_n;
-        save_fname = sprintf('%s_tilfile%03d_.mat',save_fname,iS);
-        save(fullfile(save_path,save_fname),'-struct','A');
+        save(fullfile(save_path,sprintf('%s_file001-%03d_.mat',save_fname,iS)),...
+             '-struct','A');
     end
 
 end  % all click files
@@ -147,8 +159,7 @@ A.rot_n = rot_n;
 
 
 % Save results
-save_fname = [save_fname,'_results.mat'];
-save(fullfile(save_path,save_fname),'-struct','A');
+save(fullfile(save_path,[save_fname,'_results.mat']),'-struct','A');
 
 
 
