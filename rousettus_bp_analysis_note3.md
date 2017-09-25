@@ -44,11 +44,15 @@ Move most BEM calculation results off from the gal-e server. Only keep the ones 
 ### Cont: Quantification of measured and modeled beampattern
 * Follow from yesterday: compare the max beam energy location vs averaged location for the top X%.
 	* For composite measured clicks, the averaged location of all points >-1 dB normalized beam energy ('r^') is much closer to the location of the center of the best-fitting ellipse ('ro') than just the max beam energy location ('rx') (`fig_composite_click_avg_bp_20170920`)
+
 	<img src=./img/fig_composite_click_avg_bp_20170920_batall_bin10_th0_35kHz_avg_bp_left.png width="400">	<img src=./img/fig_composite_click_avg_bp_20170920_batall_bin10_th0_35kHz_avg_bp_right.png width="400">
 	* The above is the same for individual measured clicks: 'r^' is closer to 'ro' than 'rx' (`fig_single_bp_on_globe_20170920`)
+
 	<img src=./img/fig_single_bp_on_globe_20170920_36134_02_c19_f35kHz_eckert4_rbf_mic.png width="400">	<img src=./img/fig_single_bp_on_globe_20170920_36134_02_c20_f35kHz_eckert4_rbf_mic.png width="400">
 	* The above is also true for modeled beampattern: 'r^' is closer to 'ro' than 'rx' (`fig_model_steer_h_bpctr`)
+
 	<img src=./img/fig_model_steer_h_bpctr_20160917_Ra-colony-rotear-0.5mm_x029t023_y000.0_z-05.0_2345_90deg_left_cntr.png width="800">	<img src=./img/fig_model_steer_h_bpctr_20160917_Ra-colony-rotear-0.5mm_x029t023_y000.0_z-05.0_2345_90deg_left_all.png width="800">
+
 	* Based on the above results, the conclusion is that **it is safe to use the center of the best-fitting ellipse to denote the beam center**.
 * Find beam center for composite modeled clicks:
 	* It seems like the submitted paper used simulated results from 20161009, but should actually redo the simulation using rotation results from 20170308 (produced by `rotate_all_click_2010308`, note the missing `7` in the folder/file name). This would include the application of the newer version of `shift_rotate_bp` that does not kick out out-of-bnd points (which was corrected in `rotate_all_click_20161025`).
@@ -85,7 +89,7 @@ Move most BEM calculation results off from the gal-e server. Only keep the ones 
 * Wrote `add_bpctr_to_composite_output` to add beam center locations into composite beam measurement files. The routines are from `fig_composite_click_avg_bp_20170920`. This is to facilitate plotting the beam center in various representations (e.g., avg_bp or cntr).
 * Compare the aspect ratio (el/az of best-fitting ellipse) between data and the phased array and piston model. Code is `fig_azel_distr_indiv_composite_model_20170923`. In here can see that the distributions of aspect ratio for the data and the phased array model are very similar:
 
-	<img src=./img/fig_azel_distr_indiv_composite_model_20170923_batall_bin10_th0_nstd1.0_scatter.png width="300">    <img src=./img/fig_azel_distr_indiv_composite_model_20170923_batall_bin10_th0_nstd1.0_ar.png width="400">
+	<img src=./img/fig_azel_distr_indiv_composite_model_20170923_batall_bin10_th0_nstd1.0_scatter.png width="600">    <img src=./img/fig_azel_distr_indiv_composite_model_20170923_batall_bin10_th0_nstd1.0_ar.png width="300">
 
 
 
@@ -93,12 +97,15 @@ Move most BEM calculation results off from the gal-e server. Only keep the ones 
 ### Cont: Quantification of measured and modeled beampattern
 * Need to re-run multi-freq model bp simulation code (`model_composite_RaColony3456_20170921.m`) because forgot to 60 kHz in the batch yesterday. The whole evaluated frequency range should be 20:5:60 kHz.
 * Updated `model_composite_RaColony3456_20170921` to include getting -3dB contours and beam center for all frequencies. Different from the plotting routines for composite measured clicks, here all plots for model composite clicks are done in this code.
+* Wrote `multifreq_indiv_bpctr_cntr_20170924` to plot the beam centers and -3dB contours at each frequency for all individual clicks (measured during exp). Note the beam center and contour locations were already aligned with the
+* Revise `shift_rotate_bp.m`: adding upper limit for the time to try rotating and fitting ellipse (<2000) and varargout to track number of rotation (variable `rot_n`).
 
 * Tasks today:
        * individual and composite model click multi-freq ellipse fitting
        * individual and composite measured click multi-freq ellipse fitting
        * compare stats of the above
-       * Run `model_composite_RaColony3456_20170921` once Monte Carlo simulation is done for noise_std=1.0
+       * Re-run `model_composite_RaColony3456_20170921` once Monte Carlo simulation is done for noise_std=1.0
+
 
 * **NOTE** The `multifreq_composite_click_***_20170308` series of code starts by `multifreq_composite_click_20170308` and then calculate other related attributes, including `..._avg_bp` (beampattern for average click), `..._cntr` (multi-freq contour for average click), and `..._fit_elps` (fitting ellipse to -3dB contour at 35 kHz).
 
