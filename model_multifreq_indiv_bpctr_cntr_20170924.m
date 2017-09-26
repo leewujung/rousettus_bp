@@ -131,8 +131,8 @@ for iS=1:length(data_file)
         else
             if rot_max.E.x0<xy_lim(1) || rot_max.E.x0>xy_lim(2) ||...
                     rot_max.E.y0<xy_lim(3) || rot_max.E.y0>xy_lim(4)
-                bpctr(iS,iF).ectr_el = [];
-                bpctr(iS,iF).ectr_az = [];
+                bpctr(iS,iF).ectr_el = NaN;
+                bpctr(iS,iF).ectr_az = NaN;
             else            
                 [el_ectr,az_ectr] = minvtran(D.map.mstruct,rot_max.E.x0,rot_max.E.y0);  % inverse map projection
                 [bpctr(iS,iF).ectr_el,bpctr(iS,iF).ectr_az] = rotatem(el_ectr,az_ectr,...
