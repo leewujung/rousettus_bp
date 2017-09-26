@@ -261,6 +261,9 @@ for iB=1:3
         colorbar('Ticks',linspace(0+1/num_freq_plot/2,1-1/num_freq_plot/2,num_freq_plot),...
                  'TickLabels',{num2str(D.freq.all(freqI(2:end-1))'/1e3)},'location','southoutside');
         grid
+        if ii<=2
+            title(sprintf('beam center: %s',bpctr_opt));
+        end
     end
 
 
