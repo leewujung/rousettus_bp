@@ -130,7 +130,7 @@ Move most BEM calculation results off from the gal-e server. Only keep the ones 
 	<img src=./img/model_multifreq_indiv_bpctr_cntr_20170924_std1.0_azdistr_top.png width="400">	<img src=./img/multifreq_indiv_bpctr_cntr_20170924_batall_azdistr_top.png width="400">
 
 
-
+ 
 
 
 * **NOTE** The `multifreq_composite_click_***_20170308` series of code starts by `multifreq_composite_click_20170308` and then calculate other related attributes, including `..._avg_bp` (beampattern for average click), `..._cntr` (multi-freq contour for average click), and `..._fit_elps` (fitting ellipse to -3dB contour at 35 kHz).

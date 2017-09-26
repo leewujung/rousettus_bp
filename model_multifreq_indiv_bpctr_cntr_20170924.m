@@ -285,7 +285,7 @@ for iB=1:3
         bpctr_opt = 'ectr';
     end
 
-    fig_hist = figure('position',[100,50,1100,900]);
+    fig_hist = figure('position',[100,50,900,1200]);
     cnt = 0;
     for iF=freqI(2:num_freq-1)  % 25:5:55 kHz, need to use sorted freq sequence
         cnt = cnt+1;
@@ -326,12 +326,20 @@ for iB=1:3
         vmax = ceil(vmax*10)/10;
         subplot(num_freq-2,2,(cnt-1)*2+1);
         ylim([0,vmax])
+        grid
         set(gca,'ytick',0:0.1:vmax)
         subplot(num_freq-2,2,(cnt-1)*2+2);
         ylim([0,vmax])
+        grid
         set(gca,'ytick',0:0.1:vmax)
+        if cnt==7
+            subplot(num_freq-2,2,(cnt-1)*2+1);
+            xlabel('Frequency (kHz)');
+            subplot(num_freq-2,2,(cnt-1)*2+2);
+            xlabel('Frequency (kHz)');
+        end
     end
-    suptitle(sprintf('beam center = %s',bpctr_opt));
+    suptitle(sprintf('Model, beam center = %s',bpctr_opt));
     saveas(fig_hist,fullfile(save_path,sprintf('%s_azdistr_%s.fig',save_fname,bpctr_opt)),'fig');
     saveSameSize_res(fig_hist,120,...
                      'file',fullfile(save_path,sprintf('%s_azdistr_%s.png',save_fname,bpctr_opt)),...
@@ -349,7 +357,7 @@ plot([bpctr_az.mean(freqI).max_left],'o-')
 hold on
 plot([bpctr_az.mean(freqI).max_right],'o-')
 legend('Left','Right')
-title('beam center = max')
+title('Model, beam center = max')
 grid
 set(gca,'xtick',1:9,'xticklabel',[D.freq.all(freqI)'/1e3])
 xlabel('Frequency (kHz)')
@@ -360,7 +368,7 @@ plot([bpctr_az.mean(freqI).top_left],'o-')
 hold on
 plot([bpctr_az.mean(freqI).top_right],'o-')
 legend('Left','Right')
-title('beam center = top')
+title('Model, beam center = top')
 grid
 set(gca,'xtick',1:9,'xticklabel',[D.freq.all(freqI)'/1e3])
 xlabel('Frequency (kHz)')
@@ -371,7 +379,7 @@ plot([bpctr_az.mean(freqI).ectr_left],'o-')
 hold on
 plot([bpctr_az.mean(freqI).ectr_right],'o-')
 legend('Left','Right')
-title('beam center = ectr')
+title('Model, beam center = ectr')
 grid
 set(gca,'xtick',1:9,'xticklabel',[D.freq.all(freqI)'/1e3])
 xlabel('Frequency (kHz)')
