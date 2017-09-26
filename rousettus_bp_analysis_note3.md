@@ -128,11 +128,11 @@ Move most BEM calculation results off from the gal-e server. Only keep the ones 
 
 	* Comparing beam center location for data and model: distribution **ectr**
 	
-	<img src=./img/model_multifreq_indiv_bpctr_cntr_20170924_std1.0_azdistr_ectr.png width="450">	<img src=./img/multifreq_indiv_bpctr_cntr_20170924_batall_azdistr_ectr.png width="450">
+	<img src=./img/model_multifreq_indiv_bpctr_cntr_20170924_std1.0_azdistr_ectr.png width="400">	<img src=./img/multifreq_indiv_bpctr_cntr_20170924_batall_azdistr_ectr.png width="400">
 
 	* Comparing beam center location for data and model: distribution **top**
 	
-	<img src=./img/model_multifreq_indiv_bpctr_cntr_20170924_std1.0_azdistr_top.png width="450">	<img src=./img/multifreq_indiv_bpctr_cntr_20170924_batall_azdistr_top.png width="450">
+	<img src=./img/model_multifreq_indiv_bpctr_cntr_20170924_std1.0_azdistr_top.png width="400">	<img src=./img/multifreq_indiv_bpctr_cntr_20170924_batall_azdistr_top.png width="400">
 
 
  
