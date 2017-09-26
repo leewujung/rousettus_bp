@@ -91,8 +91,10 @@ Move most BEM calculation results off from the gal-e server. Only keep the ones 
 
 	<img src=./img/fig_azel_distr_indiv_composite_model_20170923_batall_bin10_th0_nstd1.0_scatter.png width="600">    <img src=./img/fig_azel_distr_indiv_composite_model_20170923_batall_bin10_th0_nstd1.0_ar.png width="300">
 
-
-
+	Did statistical tests for 1) between the data and the piston model and 2) between the data and the phased array model. Use 2 different tests:
+		* KS 2-sample test: (1) p=0.03xx  (2) p=somethinge-21
+		* Mann-Whitney U-test: (1) p=0.5xxx  (2) p=somethinge-9
+		
 ## 2017/09/24
 ### Cont: Quantification of measured and modeled beampattern
 * Need to re-run multi-freq model bp simulation code (`model_composite_RaColony3456_20170921.m`) because forgot to 60 kHz in the batch yesterday. The whole evaluated frequency range should be 20:5:60 kHz.
@@ -115,8 +117,14 @@ Move most BEM calculation results off from the gal-e server. Only keep the ones 
 	<img src=./img/check_head_marker_effect_aim_diff.png width="400">
 	
 	* Make sure both codes below are working for extracting -3dB contours and beam center for all frequencies and for all clicks:
-		* `multifreq_indiv_bpctr_cntr_20170924.m` --> data
-		* `model_multifreq_indiv_bpctr_cntr_20170924.m` --> model
+		* **Data:** `multifreq_indiv_bpctr_cntr_20170924.m`
+		
+		<img src=./img/multifreq_indiv_bpctr_cntr_20170924_batall_ectr.png width="800">
+		
+		* **Model:** `model_multifreq_indiv_bpctr_cntr_20170924.m`
+		
+		<img src=./img/model_multifreq_indiv_bpctr_cntr_20170924_std1.0_ectr.png width="800">
+
 	* Comparing beam center location for data and model: mean
 	
 	<img src=./img/model_multifreq_indiv_bpctr_cntr_20170924_std1.0_azmean.png width="400">	<img src=./img/multifreq_indiv_bpctr_cntr_20170924_batall_azmean.png width="400">
