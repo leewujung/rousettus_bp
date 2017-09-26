@@ -91,9 +91,9 @@ Move most BEM calculation results off from the gal-e server. Only keep the ones 
 
 	<img src=./img/fig_azel_distr_indiv_composite_model_20170923_batall_bin10_th0_nstd1.0_scatter.png width="600">    <img src=./img/fig_azel_distr_indiv_composite_model_20170923_batall_bin10_th0_nstd1.0_ar.png width="300">
 
-	Did statistical tests for 1) between the data and the piston model and 2) between the data and the phased array model. Use 2 different tests:
-		* KS 2-sample test: (1) p=0.03xx  (2) p=somethinge-21
-		* Mann-Whitney U-test: (1) p=0.5xxx  (2) p=somethinge-9
+	Did statistical tests for 1) between the data and the piston model and 2) between the data and the phased array model. Use 2 different tests and results are the same:
+		* KS 2-sample test: (1) p=0.4995  (2) p=5.9015e-81
+		* Mann-Whitney U-test: (1) p=0.7722  (2) p=9.1145e-81
 		
 ## 2017/09/24
 ### Cont: Quantification of measured and modeled beampattern
