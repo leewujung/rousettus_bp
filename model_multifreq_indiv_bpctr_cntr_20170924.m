@@ -43,6 +43,7 @@ num_freq = length(D.freq.all);
 num_freq_plot = num_freq-2;
 
 A.param.num_ch = num_ch;
+A.freq = D.freq;
 A.map = D.map;
 
 
