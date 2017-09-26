@@ -117,20 +117,25 @@ Move most BEM calculation results off from the gal-e server. Only keep the ones 
 	* Make sure both codes below are working for extracting -3dB contours and beam center for all frequencies and for all clicks:
 		* `multifreq_indiv_bpctr_cntr_20170924.m` --> data
 		* `model_multifreq_indiv_bpctr_cntr_20170924.m` --> model
+	* Comparing beam center location for data and model: mean
 	
+	<img src=./img/model_multifreq_indiv_bpctr_cntr_20170924_std1.0_azmean.png width="400">	<img src=./img/multifreq_indiv_bpctr_cntr_20170924_batall_azmean.png width="400">
 
-* Tasks today:
-       * individual and composite model click multi-freq ellipse fitting
-       * individual and composite measured click multi-freq ellipse fitting
-       * compare stats of the above
-       * Re-run `model_composite_RaColony3456_20170921` once Monte Carlo simulation is done for noise_std=1.0
+	* Comparing beam center location for data and model: distribution **ectr**
+	
+	<img src=./img/model_multifreq_indiv_bpctr_cntr_20170924_std1.0_azdistr_ectr.png width="400">	<img src=./img/multifreq_indiv_bpctr_cntr_20170924_batall_azdistr_ectr.png width="400">
+
+	* Comparing beam center location for data and model: distribution **top**
+	
+	<img src=./img/model_multifreq_indiv_bpctr_cntr_20170924_std1.0_azdistr_top.png width="400">	<img src=./img/multifreq_indiv_bpctr_cntr_20170924_batall_azdistr_top.png width="400">
+
+
+
 
 
 * **NOTE** The `multifreq_composite_click_***_20170308` series of code starts by `multifreq_composite_click_20170308` and then calculate other related attributes, including `..._avg_bp` (beampattern for average click), `..._cntr` (multi-freq contour for average click), and `..._fit_elps` (fitting ellipse to -3dB contour at 35 kHz).
 
 
-* Now characterize the movement of multi-freq center in both measurements and models
-	* Compare composite clicks since the results are more stable, but note that the beam locations have been shifted based on the max beam location at 35 kHz
 
 
 ## TO-DO

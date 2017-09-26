@@ -158,6 +158,39 @@ A.click_side = click_side;
 A.rot_n = rot_n;
 
 
+
+% Find stats for beam center az distribution
+for iF=1:num_freq
+    idx_left = click_side==0;
+
+    % mean of all beam center
+    bpctr_az.mean(iF).max_left = nanmean([bpctr(idx_left,iF).max_az]);
+    bpctr_az.mean(iF).top_left = nanmean([bpctr(idx_left,iF).top_az]);
+    bpctr_az.mean(iF).ectr_left = nanmean([bpctr(idx_left,iF).ectr_az]);
+    bpctr_az.mean(iF).max_right = nanmean([bpctr(~idx_left,iF).max_az]);
+    bpctr_az.mean(iF).top_right = nanmean([bpctr(~idx_left,iF).top_az]);
+    bpctr_az.mean(iF).ectr_right = nanmean([bpctr(~idx_left,iF).ectr_az]);
+    
+    % median of all beam center
+    bpctr_az.median(iF).max_left = nanmedian([bpctr(idx_left,iF).max_az]);
+    bpctr_az.median(iF).top_left = nanmedian([bpctr(idx_left,iF).top_az]);
+    bpctr_az.median(iF).ectr_left = nanmedian([bpctr(idx_left,iF).ectr_az]);
+    bpctr_az.median(iF).max_right = nanmedian([bpctr(~idx_left,iF).max_az]);
+    bpctr_az.median(iF).top_right = nanmedian([bpctr(~idx_left,iF).top_az]);
+    bpctr_az.median(iF).ectr_right = nanmedian([bpctr(~idx_left,iF).ectr_az]);
+
+    % std of all beam center
+    bpctr_az.std(iF).max_left = nanstd([bpctr(idx_left,iF).max_az]);
+    bpctr_az.std(iF).top_left = nanstd([bpctr(idx_left,iF).top_az]);
+    bpctr_az.std(iF).ectr_left = nanstd([bpctr(idx_left,iF).ectr_az]);
+    bpctr_az.std(iF).max_right = nanstd([bpctr(~idx_left,iF).max_az]);
+    bpctr_az.std(iF).top_right = nanstd([bpctr(~idx_left,iF).top_az]);
+    bpctr_az.std(iF).ectr_right = nanstd([bpctr(~idx_left,iF).ectr_az]);
+end
+A.bpctr_az = bpctr_az;
+
+
+
 % Save results
 save(fullfile(save_path,[save_fname,'_results.mat']),'-struct','A');
 
@@ -194,19 +227,18 @@ for iB=1:3
             else
                 subplot(221);
             end
-            if ~isempty(rot_n(iS,iF))
-                switch bpctr_opt
-                  case 'max'
-                    plotm(bpctr(iS,iF).max_el,bpctr(iS,iF).max_az,'.','markersize',8,...
-                          'linewidth',2,'color',colorset(cnt,:));
-                  case 'top'
-                    plotm(bpctr(iS,iF).top_el,bpctr(iS,iF).top_az,'.','markersize',8,...
-                          'linewidth',2,'color',colorset(cnt,:));
-                  case 'ectr'
-                    plotm(bpctr(iS,iF).ectr_el,bpctr(iS,iF).ectr_az,'.','markersize',8,...
-                          'linewidth',2,'color',colorset(cnt,:));
-                end
+            switch bpctr_opt
+              case 'max'
+                plotm(bpctr(iS,iF).max_el,bpctr(iS,iF).max_az,'.','markersize',8,...
+                      'linewidth',2,'color',colorset(cnt,:));
+              case 'top'
+                plotm(bpctr(iS,iF).top_el,bpctr(iS,iF).top_az,'.','markersize',8,...
+                      'linewidth',2,'color',colorset(cnt,:));
+              case 'ectr'
+                plotm(bpctr(iS,iF).ectr_el,bpctr(iS,iF).ectr_az,'.','markersize',8,...
+                      'linewidth',2,'color',colorset(cnt,:));
             end
+
             % -3dB contours
             if click_side(iS)==1
                 subplot(224);
@@ -238,3 +270,120 @@ for iB=1:3
     epswrite(fullfile(save_path,sprintf('%s_%s.eps',save_fname,bpctr_opt)));
 
 end
+
+
+
+
+% Compare distribution of beam center location across freq
+for iB=1:3
+    switch iB
+      case 1
+        bpctr_opt = 'max';
+      case 2
+        bpctr_opt = 'top';
+      case 3
+        bpctr_opt = 'ectr';
+    end
+
+    fig_hist = figure('position',[100,50,1100,900]);
+    cnt = 0;
+    for iF=freqI(2:num_freq-1)  % 25:5:55 kHz, need to use sorted freq sequence
+        cnt = cnt+1;
+        idx_left = click_side==0;
+
+        % left
+        subplot(num_freq-2,2,(cnt-1)*2+1);
+        switch bpctr_opt
+          case 'max'
+            hl = histogram([bpctr(idx_left,iF).max_az],-30:2:30,...
+                           'normalization','probability');
+          case 'top'
+            hl = histogram([bpctr(idx_left,iF).top_az],-30:2:30,...
+                           'normalization','probability');
+          case 'ectr'
+            hl = histogram([bpctr(idx_left,iF).ectr_az],-30:2:30,...
+                           'normalization','probability');
+        end
+        legend(sprintf('%d kHz',D.freq.all(iF)/1e3));
+        
+        % right
+        subplot(num_freq-2,2,(cnt-1)*2+2);
+        switch bpctr_opt
+          case 'max'
+            hr = histogram([bpctr(~idx_left,iF).max_az],-30:2:30,...
+                           'normalization','probability');
+          case 'top'
+            hr = histogram([bpctr(~idx_left,iF).top_az],-30:2:30,...
+                           'normalization','probability');
+          case 'ectr'
+            hr = histogram([bpctr(~idx_left,iF).ectr_az],-30:2:30,...
+                           'normalization','probability');
+        end
+        legend(sprintf('%d kHz',D.freq.all(iF)/1e3));
+
+        % Set ylim
+        vmax = max([hl.Values,hr.Values]);
+        vmax = ceil(vmax*10)/10;
+        subplot(num_freq-2,2,(cnt-1)*2+1);
+        ylim([0,vmax])
+        set(gca,'ytick',0:0.1:vmax)
+        subplot(num_freq-2,2,(cnt-1)*2+2);
+        ylim([0,vmax])
+        set(gca,'ytick',0:0.1:vmax)
+    end
+    suptitle(sprintf('beam center = %s',bpctr_opt));
+    saveas(fig_hist,fullfile(save_path,sprintf('%s_azdistr_%s.fig',save_fname,bpctr_opt)),'fig');
+    saveSameSize_res(fig_hist,120,...
+                     'file',fullfile(save_path,sprintf('%s_azdistr_%s.png',save_fname,bpctr_opt)),...
+                     'format','png','renderer','painters');
+    epswrite(fullfile(save_path,sprintf('%s_azdistr_%s.eps',save_fname,bpctr_opt)));
+end
+
+
+
+% Plot mean beam center az locations
+fig_bpctr_stat = figure('position',[680,100,560,850]);
+
+subplot(311)
+plot([bpctr_az.mean(freqI).max_left],'o-')
+hold on
+plot([bpctr_az.mean(freqI).max_right],'o-')
+legend('Left','Right')
+title('beam center = max')
+grid
+set(gca,'xtick',1:9,'xticklabel',[D.freq.all(freqI)'/1e3])
+xlabel('Frequency (kHz)')
+ylabel('Azimuth angle (deg)')
+
+subplot(312)
+plot([bpctr_az.mean(freqI).top_left],'o-')
+hold on
+plot([bpctr_az.mean(freqI).top_right],'o-')
+legend('Left','Right')
+title('beam center = top')
+grid
+set(gca,'xtick',1:9,'xticklabel',[D.freq.all(freqI)'/1e3])
+xlabel('Frequency (kHz)')
+ylabel('Azimuth angle (deg)')
+
+subplot(313)
+plot([bpctr_az.mean(freqI).ectr_left],'o-')
+hold on
+plot([bpctr_az.mean(freqI).ectr_right],'o-')
+legend('Left','Right')
+title('beam center = ectr')
+grid
+set(gca,'xtick',1:9,'xticklabel',[D.freq.all(freqI)'/1e3])
+xlabel('Frequency (kHz)')
+ylabel('Azimuth angle (deg)')
+
+saveas(fig_bpctr_stat,fullfile(save_path,sprintf('%s_azmean.fig',save_fname)),'fig');
+saveSameSize_res(fig_bpctr_stat,150,'file',...
+                 fullfile(save_path,sprintf('%s_azmean.png',save_fname)),...
+                 'format','png','renderer','painters');
+epswrite(fullfile(save_path,sprintf('%s_azmean.eps',save_fname)));
+
+
+
+
+
