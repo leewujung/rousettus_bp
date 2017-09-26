@@ -121,6 +121,11 @@ Move most BEM calculation results off from the gal-e server. Only keep the ones 
 	
 	<img src=./img/model_multifreq_indiv_bpctr_cntr_20170924_std1.0_azmean.png width="400">	<img src=./img/multifreq_indiv_bpctr_cntr_20170924_batall_azmean.png width="400">
 
+	* More direct comparison of beam center location for data and model:
+	
+	<img src=./img/compare_data_model_bpctr.png width="800">
+
+
 	* Comparing beam center location for data and model: distribution **ectr**
 	
 	<img src=./img/model_multifreq_indiv_bpctr_cntr_20170924_std1.0_azdistr_ectr.png width="400">	<img src=./img/multifreq_indiv_bpctr_cntr_20170924_batall_azdistr_ectr.png width="400">
