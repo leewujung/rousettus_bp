@@ -82,10 +82,10 @@ Move most BEM calculation results off from the gal-e server. Only keep the ones 
 ## 2017/09/23
 ### Cont: Quantification of measured and modeled beampattern
 * Finished multi-freq model bp simulation and composite model bp compilation code:
-       * `model_bp_proj_RaColony_diffonly_20170921`: calculate the shift between the beam center for measurements and model bp at 35 kHz.
-       * `model_bp_proj_RaColony_multifreq_20170921`: use the shift value from `...diffonly_20170921` to simulated model bp for 25:10:35 kHz.
-       * `model_composite_RaColony3456_20170921`: assemble simulated model bp values from `..._multifreq_20170921` to reconstructed composite model bp.
-       * the code above were executed in the order introduced.
+  	          * `model_bp_proj_RaColony_diffonly_20170921`: calculate the shift between the beam center for measurements and model bp at 35 kHz.
+		  * `model_bp_proj_RaColony_multifreq_20170921`: use the shift value from `...diffonly_20170921` to simulated model bp for 25:10:35 kHz.
+		  * `model_composite_RaColony3456_20170921`: assemble simulated model bp values from `..._multifreq_20170921` to reconstructed composite model bp.
+		  * the code above were executed in the order introduced.
 * Wrote `add_bpctr_to_composite_output` to add beam center locations into composite beam measurement files. The routines are from `fig_composite_click_avg_bp_20170920`. This is to facilitate plotting the beam center in various representations (e.g., avg_bp or cntr).
 * Compare the aspect ratio (el/az of best-fitting ellipse) between data and the phased array and piston model. Code is `fig_azel_distr_indiv_composite_model_20170923`. In here can see that the distributions of aspect ratio for the data and the phased array model are very similar:
 
@@ -99,6 +99,25 @@ Move most BEM calculation results off from the gal-e server. Only keep the ones 
 * Updated `model_composite_RaColony3456_20170921` to include getting -3dB contours and beam center for all frequencies. Different from the plotting routines for composite measured clicks, here all plots for model composite clicks are done in this code.
 * Wrote `multifreq_indiv_bpctr_cntr_20170924` to plot the beam centers and -3dB contours at each frequency for all individual clicks (measured during exp). Note the beam center and contour locations were already aligned with the
 * Revise `shift_rotate_bp.m`: adding upper limit for the time to try rotating and fitting ellipse (<2000) and varargout to track number of rotation (variable `rot_n`).
+* Wrote a randomized model bp version of the multi-frequency Monte Carlo code: `model_bp_proj_RaColony_multiple_multifreq_20170924.m`. This code uses the same set of bp model as in `model_bp_proj_RaColony_multiple_20161025.m` but makes multi-frequency simulations.
+
+
+
+## 2017/09/25
+### Cont: Quantification of measured and modeled beampattern
+* `check_head_marker_effect.m` checks the percentage and deviation of head aim angles between head aims derived from head markers vs from trajectories.
+	* Analysis found 76% of the measurements were using head aim derived from head markers, and 24% from trajectories
+	
+	<img src=./img/check_head_marker_effect_goodidx.png width="1000">
+	
+	* Calculated the distribution of head aim differences (using clicks with which head markers are available to make this comparison), the result is as the following:
+	
+	<img src=./img/check_head_marker_effect_aim_diff.png width="400">
+	
+	* Make sure both codes below are working for extracting -3dB contours and beam center for all frequencies and for all clicks:
+		* `multifreq_indiv_bpctr_cntr_20170924.m` --> data
+		* `model_multifreq_indiv_bpctr_cntr_20170924.m` --> model
+	
 
 * Tasks today:
        * individual and composite model click multi-freq ellipse fitting

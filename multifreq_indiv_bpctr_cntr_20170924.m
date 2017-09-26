@@ -101,7 +101,7 @@ for iS=1:length(data_file)
 
         % interpolate for particular frequency --> rotated locations
         if isempty(D.rot_elpctr_tilt)
-            c3db_xy_freq(iS,iF) = [NaN,NaN];
+            c3db_xy_freq{iS,iF} = [NaN,NaN];
             bpctr(iS,iF).max_el = NaN;
             bpctr(iS,iF).max_az = NaN;
             bpctr(iS,iF).top_el = NaN;
