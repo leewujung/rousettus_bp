@@ -80,11 +80,15 @@ shift_max.call_dB = call_dB;
 E_max = bp_fit_ellipse_azel(shift_max,mstruct);  % fit ellipse
 shift_max.E = E_max;
 
-
 % Skip procedure below because the estimated ellipse center is beyond the
 % boundary of globe
-if E_max.x0<xy_lim(1) || E_max.x0>xy_lim(2) ||...
-   E_max.y0<xy_lim(3) || E_max.y0>xy_lim(4)
+if ~isempty(E_max)
+    bad_bpctr = E_max.x0<xy_lim(1) || E_max.x0>xy_lim(2) ||...
+                E_max.y0<xy_lim(3) || E_max.y0>xy_lim(4);
+else
+    bad_bpctr = 1;
+end
+if bad_bpctr
     shift_elpctr = [];
     shift_elpctr_tilt = [];
     varargout{1} = 0;

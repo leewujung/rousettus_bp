@@ -127,7 +127,7 @@ for iS=1:length(data_file)
             shift_rotate_bp(D.rot_elpctr_tilt.az/180*pi,...
                             D.rot_elpctr_tilt.el/180*pi,...
                             D.v_mic(:,iF),D.map.map_projection,0.005);
-        if isempty(rot_max)
+        if isempty(rot_max) || isempty(rot_max.E)
             bpctr(iS,iF).ectr_el = NaN;
             bpctr(iS,iF).ectr_az = NaN;
         else
