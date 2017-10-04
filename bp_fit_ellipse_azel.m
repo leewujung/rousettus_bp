@@ -10,6 +10,7 @@ function E = bp_fit_ellipse_azel(M,mstruct)
 % 2015/12/25  update to use 'get_main_contour.m' to obtain -3dB contour
 % 2016/04/19  move plotting routine outside of the function to rotate_all_click.m
 % 2016/07/26  check is c_main empty
+% 2017/10/03  check if EllipseDirectFit results into empty matrix
 
 
 % Get -3dB contour
@@ -26,13 +27,17 @@ if isempty(c_main)
     E = [];
     return;
 else
-[c3db_xy(:,1),c3db_xy(:,2)] = mfwdtran(mstruct,c_main(:,2),c_main(:,1));  % [az,el] to [x,y]
+    [c3db_xy(:,1),c3db_xy(:,2)] = mfwdtran(mstruct,c_main(:,2),c_main(:,1));  % [az,el] to [x,y]
 end
 
 % Ellipse fitting
 A = EllipseDirectFit(c3db_xy);  % fit ellipse (direct fit)
-E = get_ellipse_param(A);       % get ellipse parameters
-E.c3db_xy = c3db_xy;
+if ~isempty(A)
+    E = get_ellipse_param(A);       % get ellipse parameters
+    E.c3db_xy = c3db_xy;
+else
+    E.c3db_xy = [NaN, NaN];
+end
  
 
 % Old routine for finding -3dB contour: before 2014/12/24
