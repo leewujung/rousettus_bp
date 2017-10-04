@@ -159,6 +159,19 @@ Move most BEM calculation results off from the gal-e server. Only keep the ones 
 * **NOTE**: may need to fix bug related to when `EllipseDirectFit` returns empty values in other `..._bpctr_cntr_...` code (phased array model bp multi-freq, fixed and multiple bp cases). This bug didn't appear before but appeared in file 130 when running `model_piston_multifreq_indiv_bpctr_cntr_20171003.m`.
 
 
+## 2017/10/04
+* Finished calculating Monte Carlo multi-freq piston model projection. Below are the results:
+<img src=./img/model_piston_multifreq_indiv_bpctr_cntr_20171003_std1.0_azdistr_ectr.png width="600">
+<img src=./img/model_piston_multifreq_indiv_bpctr_cntr_20171003_std1.0_ectr.png width="800">
+* Data-model comparison of beam center location, use the new set of piston model:
+<img src=./img/compare_data_model_bpctr_meanonly.png width="800">
+* Data-model comparison of az-el scatter plot, use the new set of piston model:
+<img src=./img/fig_azel_distr_indiv_composite_model_20171004_batall_bin10_th0_nstd1.0_ar.png width="400">
+* Data-model comparison of az-el scatter plot, use the new set of piston model:
+<img src=./img/fig_azel_distr_indiv_composite_model_20171004_batall_bin10_th0_nstd1.0_scatter.png width="600">
+
+
+
 
 ## TO-DO
 * Use the plotting routines in `plot_indiv_click_rorate` to update those in the beampattern processing GUI, since doing conversion to map domain and plot using `contour` is much faster than calling `contourfm`
