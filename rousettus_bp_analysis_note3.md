@@ -156,7 +156,7 @@ Move most BEM calculation results off from the gal-e server. Only keep the ones 
 	* `model_piston_proj_multifreq_20171003.m`: multi-freq simulation
 	* `model_piston_multifreq_indiv_bpctr_cntr_20171003.m`: finding bpctr and -3 dB contours for all freq 
 * Added exception case when `EllipseDirectFit` spit out empty values in output variable `A`. Also revised function `bp_fit_ellipse_azel` which uses `EllipseDirectFit` and is called by `shift_rotate_bp`. Such errors were encountered when running `model_piston_multifreq_indiv_bpctr_cntr_20171003.m`.
-
+* **NOTE**: may need to fix bug related to when `EllipseDirectFit` returns empty values in other `..._bpctr_cntr_...` code (phased array model bp multi-freq, fixed and multiple bp cases). This bug didn't appear before but appeared in file 130 when running `model_piston_multifreq_indiv_bpctr_cntr_20171003.m`.
 
 
 
