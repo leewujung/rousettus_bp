@@ -151,6 +151,12 @@ Move most BEM calculation results off from the gal-e server. Only keep the ones 
 * **NOTE** The `multifreq_composite_click_***_20170308` series of code starts by `multifreq_composite_click_20170308` and then calculate other related attributes, including `..._avg_bp` (beampattern for average click), `..._cntr` (multi-freq contour for average click), and `..._fit_elps` (fitting ellipse to -3dB contour at 35 kHz).
 
 
+## 2017/10/03
+* Update Monte Carlo piston model simulation to multi-freq version to enable comparison with multi-freq phased array and data. The code are:
+	* `model_piston_proj_multifreq_20171003.m`: multi-freq simulation
+	* `model_piston_multifreq_indiv_bpctr_cntr_20171003.m`: finding bpctr and -3 dB contours for all freq 
+
+
 
 
 ## TO-DO
