@@ -292,6 +292,43 @@ epswrite(fullfile(save_path,[save_fname,'_avg_bp_all.eps']));
 
 
 
+
+% Find beam center for model
+for  iF = 1:num_freq
+
+    % Load model prediction
+    BP = D.BP(iF);
+    idxnotnan = ~isnan(BP.pp_plot);
+    [~,BP.vq_norm,BP.azq,BP.elq] = ...
+        interp_bp(BP.az(idxnotnan)/180*pi,BP.el(idxnotnan)/180*pi,BP.pp_plot(idxnotnan),'rbf');
+    BP.azq = BP.azq/pi*180;
+    BP.elq = BP.elq/pi*180;
+
+    % --- max beam energy location
+    xx = BP.vq_norm(:);
+    [~,mm_idx] = max(xx);
+    BP.max.el = BP.elq(mm_idx);
+    BP.max.az = BP.azq(mm_idx);
+    % --- averaged location of normalized beam energy >-1
+    xx(isnan(xx)) = -inf;
+    [~,sort_idx] = sort(xx,'descend');
+    ii = xx(sort_idx)>-1;
+    BP.top.el = mean(BP.elq(sort_idx(ii)));
+    BP.top.az = mean(BP.azq(sort_idx(ii)));
+    % --- fit ellipse
+    % ------- BP.el = bem_results.theta
+    % ------- BP.az = bem_results.phi
+    [raw,rot_max,rot_elpctr,rot_elpctr_tilt] = ...
+        shift_rotate_bp_composite(BP.az,BP.el,BP.pp,D.map.map_projection,0.005);
+    [el_ectr,az_ectr] = minvtran(D.map.mstruct,rot_max.E.x0,rot_max.E.y0);  % inverse map projection
+    [BP.ectr.el,BP.ectr.az] = rotatem(el_ectr,az_ectr,...
+                                      [BP.max.el,BP.max.az],...
+                                      'inverse','degrees');
+    BP_all(iF) = BP;
+end
+
+
+
 % Plot model bp and reconstructed bp for comparison
 for iF = 1:num_freq
 
@@ -302,6 +339,10 @@ for iF = 1:num_freq
     % model bp: left
     plot_bp_simple(subplot(221),-D.BP(iF).az,D.BP(iF).el,D.BP(iF).pp_plot, ...
                    D.map.map_projection);
+    hold on
+    plotm(BP_all(iF).max.el,-BP_all(iF).max.az,'rx','markersize',8,'linewidth',2);
+    plotm(BP_all(iF).top.el,-BP_all(iF).top.az,'r^','markersize',8,'linewidth',2);
+    plotm(BP_all(iF).ectr.el,-BP_all(iF).ectr.az,'ro','markersize',8,'linewidth',2);
     title('model: left');
     gridm('gcolor',cgrey,'glinestyle','-');
     framem('fedgecolor',cgrey);
@@ -311,6 +352,10 @@ for iF = 1:num_freq
     % model bp: right
     plot_bp_simple(subplot(222),D.BP(iF).az,D.BP(iF).el,D.BP(iF).pp_plot, ...
                    D.map.map_projection);
+    hold on
+    plotm(BP_all(iF).max.el,BP_all(iF).max.az,'rx','markersize',8,'linewidth',2);
+    plotm(BP_all(iF).top.el,BP_all(iF).top.az,'r^','markersize',8,'linewidth',2);
+    plotm(BP_all(iF).ectr.el,BP_all(iF).ectr.az,'ro','markersize',8,'linewidth',2);
     title('model: right');
     gridm('gcolor',cgrey,'glinestyle','-');
     framem('fedgecolor',cgrey);
@@ -319,7 +364,11 @@ for iF = 1:num_freq
 
     % Reconstructed: left
     plot_bp_simple(subplot(223),interp_avg_left(iF).azq_avg, ...
-                   interp_avg_left(iF).elq_avg,interp_avg_left(iF).vq_norm_avg,'eckert4');
+                   interp_avg_left(iF).elq_avg, ...
+                   interp_avg_left(iF).vq_norm_avg,'eckert4');
+    plotm(left(iF).max.el,left(iF).max.az,'rx','markersize',8,'linewidth',2);
+    plotm(left(iF).top.el,left(iF).top.az,'r^','markersize',8,'linewidth',2);
+    plotm(left(iF).ectr.el,left(iF).ectr.az,'ro','markersize',8,'linewidth',2);
     title('Reconstructed bp: left');
     gridm('gcolor',cgrey,'glinestyle','-');
     framem('fedgecolor',cgrey);
@@ -329,6 +378,10 @@ for iF = 1:num_freq
     % Reconstructed: right
     plot_bp_simple(subplot(224),interp_avg_right(iF).azq_avg, ...
                    interp_avg_right(iF).elq_avg,interp_avg_right(iF).vq_norm_avg,'eckert4');
+    hold on
+    plotm(right(iF).max.el,right(iF).max.az,'rx','markersize',8,'linewidth',2);
+    plotm(right(iF).top.el,right(iF).top.az,'r^','markersize',8,'linewidth',2);
+    plotm(right(iF).ectr.el,right(iF).ectr.az,'ro','markersize',8,'linewidth',2);
     title('Reconstructed bp: right');
     gridm('gcolor',cgrey,'glinestyle','-');
     framem('fedgecolor',cgrey);
