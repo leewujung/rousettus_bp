@@ -7,12 +7,14 @@ function [c_level,c_level_nan] = get_main_contour(vq,azq,elq,level)
 %   level  level of beampattern value wanted
 % OUTPUT
 %   c_level        [az,el] contour at the level of specified bp value
-%   c_level_wnan   same as c_level but with NaN inserted at measurement boundary
+%   c_level_nan   same as c_level but with NaN inserted at measurement boundary
 
 % Wu-Jung Lee | leewujung@gmail.com
 % 2015/12/24
 % 2016/07/26  Check if max_idx is empty --> when all contours are outside
 %             of globe
+% 2017/10/05  Fix bug re. empty c_edge
+
 
 % Find contour surrounding the area with measurement
 vq_new = zeros(size(vq));
@@ -44,12 +46,15 @@ c_level = [c_level.X; c_level.Y]';
 % plot(c_level(:,1),c_level(:,2));
 
 % Delete overlapping portion
-D = pdist2(c_level,c_edge);
-[idx_level_zero,~] = ind2sub(size(D),find(D==0));
-c_level_nan = c_level;
-c_level(idx_level_zero,:) = [];
-c_level_nan(idx_level_zero,:) = NaN;
-
+if ~isempty(c_edge)
+    D = pdist2(c_level,c_edge);
+    [idx_level_zero,~] = ind2sub(size(D),find(D==0));
+    c_level_nan = c_level;
+    c_level(idx_level_zero,:) = [];
+    c_level_nan(idx_level_zero,:) = NaN;
+else
+    c_level_nan = c_level;
+end
 % figure(fig_chk)
 % plot(c_level_nan(:,1),c_level_nan(:,2),'linewidth',1.5);
 % disp('checked')
