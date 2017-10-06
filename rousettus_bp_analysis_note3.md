@@ -171,6 +171,13 @@ Move most BEM calculation results off from the gal-e server. Only keep the ones 
 <img src=./img/fig_azel_distr_indiv_composite_model_20171004_batall_bin10_th0_nstd1.0_scatter.png width="600">
 
 
+## 2017/10/05
+* Wrote new code to do Monte Carlo simulation for bullethead model using the new beam center for projection and also new rotation results from 20170308.
+* Dug into what was done before for the file used in the originally submitted ms: bullethead model was calculated on 20161013, even though the name of the folder says RaColony (`model_bp_proj_RaColony_20161013_std1.0`) the model used in side was actually `model_bp_save_20161013_bullethead-sc-colony-0.5mm_35k…`
+* Update whole bunch of code to plot beam center and update manuscript figures. **NEED TO RECORD WHICH FILES WERE CHANGED**
+* The old set of `fig_model_mf_cntr_srcnum_...` results (those used in the original submission) are moved to folder `fig_model_mf_cntr_srcnum_20160917_Ra-colony-rotear-0.5mm_2016`. New set of results are in folder `fig_model_mf_cntr_srcnum_20160917_Ra-colony-rotear-0.5mm`.
+* Create `model_bp_proj_RaColony_multiple_plotBPmodel_20170924` to plot all model bp files used in randomized Monte Carlo simulation.
+
 
 
 ## TO-DO
