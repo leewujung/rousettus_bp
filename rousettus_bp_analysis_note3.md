@@ -184,9 +184,7 @@ Move most BEM calculation results off from the gal-e server. Only keep the ones 
       * for tongue position '3456':
         ```
 	>> ectr_all =
-
 	ans = 
-
 	   -5.2643   22.2044
 	   -4.3614   25.3805
 	   -2.5044   30.5094
@@ -196,10 +194,8 @@ Move most BEM calculation results off from the gal-e server. Only keep the ones 
 	so the azimuthal beam center movement is 25.7 deg for 5 mm of tongue position change.
       * for tongue position '2345':
         ```
-	ectr_all = 
-
+	>> ectr_all = 
 	ans = 
-	
 	   -6.9118   22.1222
            -5.5663   30.2163
            -4.8028   41.4603
@@ -208,14 +204,11 @@ Move most BEM calculation results off from the gal-e server. Only keep the ones 
 	```
 	so the azimuthal beam center movement is 44.1 deg for 5 mm of tongue position change.
 * Aspect ratio of best-fitting ellipse: data=1.4917, piston demol=0.9927, phased array=1.8984
-* Location of beam center for data: 
+* Location of beam center for data (20:5:60): 
        ```
        >> [[data.bpctr_az.mean(:).ectr_left]' [data.bpctr_az.mean(:).ectr_right]']
-       
        ans =
-
-         -18.8049   12.1259
-         -11.0290    6.6338
+         -11.0290   6.6338
          -0.0379   -1.0060
          -0.0608    0.0183
           2.6540   -2.8812
