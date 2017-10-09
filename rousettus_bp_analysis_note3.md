@@ -182,45 +182,49 @@ Move most BEM calculation results off from the gal-e server. Only keep the ones 
 # 2017/10/08
 * Get beam center locations from `fig_model_steer_h_bpctr` to put into manuscript to quantify the _efficiency_ of tongue-driven beam steering:
       * for tongue position '3456':
-
-        ```
+      
+	```matlab
 	>> ectr_all =
 	ans = 
-	   -5.2643   22.2044
-	   -4.3614   25.3805
-	   -2.5044   30.5094
-	   -0.6772   38.6540
-	    1.0192   47.9112
+	-5.2643   22.2044
+	-4.3614   25.3805
+	-2.5044   30.5094
+	-0.6772   38.6540
+	1.0192   47.9112
 	```
+	
 	so the azimuthal beam center movement is 25.7 deg for 5 mm of tongue position change.
+	
       * for tongue position '2345':
-
-        ```
+	
+	```matlab
 	>> ectr_all = 
 	ans = 
-	   -6.9118   22.1222
-           -5.5663   30.2163
-           -4.8028   41.4603
-           -5.8380   53.6052
-           -4.6234   66.1982
+		-6.9118   22.1222
+		-5.5663   30.2163
+		-4.8028   41.4603
+		-5.8380   53.6052
+		-4.6234   66.1982
 	```
+	
 	so the azimuthal beam center movement is 44.1 deg for 5 mm of tongue position change.
+	
 
 * Aspect ratio of best-fitting ellipse: data=1.4917, piston demol=0.9927, phased array=1.8984
 * Location of beam center for data (20:5:60): 
 
-       ```
-       >> [[data.bpctr_az.mean(:).ectr_left]' [data.bpctr_az.mean(:).ectr_right]']
-       ans =
-         -11.0290   6.6338
-         -0.0379   -1.0060
-         -0.0608    0.0183
-          2.6540   -2.8812
-          5.7635   -5.9697
-          6.0919   -7.0380
-          6.8161   -7.3652
-          8.8791   -8.0068
-       ```
+	```matlab
+	>> [[data.bpctr_az.mean(:).ectr_left]' [data.bpctr_az.mean(:).ectr_right]']
+	ans =
+	-11.0290   6.6338
+	-0.0379   -1.0060
+	-0.0608    0.0183
+	2.6540   -2.8812
+	5.7635   -5.9697
+	6.0919   -7.0380
+	6.8161   -7.3652
+	8.8791   -8.0068
+	```
 
 
 ## TO-DO
