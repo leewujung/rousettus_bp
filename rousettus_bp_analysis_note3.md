@@ -186,11 +186,11 @@ Move most BEM calculation results off from the gal-e server. Only keep the ones 
 	```matlab
 	>> ectr_all =
 	ans = 
-	-5.2643   22.2044
-	-4.3614   25.3805
-	-2.5044   30.5094
-	-0.6772   38.6540
-	1.0192   47.9112
+		-5.2643   22.2044
+		-4.3614   25.3805
+		-2.5044   30.5094
+		-0.6772   38.6540
+		1.0192   47.9112
 	```
 	
 	so the azimuthal beam center movement is 25.7 deg for 5 mm of tongue position change.
@@ -216,14 +216,14 @@ Move most BEM calculation results off from the gal-e server. Only keep the ones 
 	```matlab
 	>> [[data.bpctr_az.mean(:).ectr_left]' [data.bpctr_az.mean(:).ectr_right]']
 	ans =
-	-11.0290   6.6338
-	-0.0379   -1.0060
-	-0.0608    0.0183
-	2.6540   -2.8812
-	5.7635   -5.9697
-	6.0919   -7.0380
-	6.8161   -7.3652
-	8.8791   -8.0068
+		-11.0290   6.6338
+		-0.0379   -1.0060
+		-0.0608    0.0183
+		2.6540   -2.8812
+		5.7635   -5.9697
+		6.0919   -7.0380
+		6.8161   -7.3652
+		8.8791   -8.0068
 	```
 
 
