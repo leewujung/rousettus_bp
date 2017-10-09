@@ -235,7 +235,7 @@ Move most BEM calculation results off from the gal-e server. Only keep the ones 
 
        ```
 
-       Also updated `fig_azel_distr_indiv_composite_model_20171004` to plot scatterhist which includes kernel density estimation of the distribution of beamwidth of all data and both models.
+* Also updated `fig_azel_distr_indiv_composite_model_20171004` to plot scatterhist which includes kernel density estimation of the distribution of beamwidth of all data and both models.
 
        <img src=./img/fig_azel_distr_indiv_composite_model_20171004_batall_bin10_th0_nstd1.0_scatterhist.png width="600">
 
