@@ -179,6 +179,25 @@ epswrite(fullfile(save_path,[save_fname,'_scatter.eps']));
 
 
 
+% Plot AZ/EL scatterhist
+num_click = length(az_piston);
+fig_az_el_sh = figure;
+x = [az_data;az_piston;az_phase];
+y = [el_data;el_piston;el_phase];
+md = cell(num_click*3,1);
+md(1:num_click) = {'Data'};
+md(num_click+(1:num_click)) = {'Piston'};
+md(num_click*2+(1:num_click)) = {'Phased'};
+scatterhist(x,y,'Group',md,'Kernel','on');
+
+saveas(fig_az_el_sh,...
+    fullfile(save_path,[save_fname,'_scatterhist.fig']),'fig');
+saveSameSize_res(fig_az_el_sh,150,'file',fullfile(save_path,[save_fname,'_scatterhist.png']),...
+    'format','png','renderer','painters');
+epswrite(fullfile(save_path,[save_fname,'_scatterhist.eps']));
+
+
+
 % Plot aspect ratio histogram
 fig_ar = figure('position',[50,50,350,450]);
 subplot(311)

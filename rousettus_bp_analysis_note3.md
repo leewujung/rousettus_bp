@@ -226,6 +226,20 @@ Move most BEM calculation results off from the gal-e server. Only keep the ones 
 		8.8791   -8.0068
 	```
 
+* Mean azimuthal and elevational beam widths from data:
+
+       ```matlab
+       >> [nanmean(az_data), nanmean(el_data)]
+       ans =
+		25.2450   36.5997
+
+       ```
+
+       Also updated `fig_azel_distr_indiv_composite_model_20171004` to plot scatterhist which includes kernel density estimation of the distribution of beamwidth of all data and both models.
+
+       <img src=./img/fig_azel_distr_indiv_composite_model_20171004_batall_bin10_th0_nstd1.0_scatterhist.png width="600">
+
+
 
 ## TO-DO
 * Use the plotting routines in `plot_indiv_click_rorate` to update those in the beampattern processing GUI, since doing conversion to map domain and plot using `contour` is much faster than calling `contourfm`
