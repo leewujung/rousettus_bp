@@ -209,8 +209,14 @@ Move most BEM calculation results off from the gal-e server. Only keep the ones 
 	
 	so the azimuthal beam center movement is 44.1 deg for 5 mm of tongue position change.
 
-* Aspect ratio of best-fitting ellipse: data=1.4917, piston demol=0.9927, phased array=1.8984
+* Aspect ratio of best-fitting ellipse:
 
+	```matlab
+	>> [nanmean(el_data./az_data), nanmean(el_piston./az_piston), nanmean(el_phase./az_phase)]
+	ans =
+		1.4917    0.9927    1.4984
+	```
+    
 * Location of beam center for data (20:5:60): 
 
 	```matlab
