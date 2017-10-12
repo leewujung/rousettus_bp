@@ -179,7 +179,7 @@ Move most BEM calculation results off from the gal-e server. Only keep the ones 
 * Create `model_bp_proj_RaColony_multiple_plotBPmodel_20170924` to plot all model bp files used in randomized Monte Carlo simulation.
 
 
-# 2017/10/08
+## 2017/10/08
 * Get beam center locations from `fig_model_steer_h_bpctr` to put into manuscript to quantify the _efficiency_ of tongue-driven beam steering:
       * for tongue position '3456':
       
@@ -208,9 +208,9 @@ Move most BEM calculation results off from the gal-e server. Only keep the ones 
 	```
 	
 	so the azimuthal beam center movement is 44.1 deg for 5 mm of tongue position change.
-	
 
 * Aspect ratio of best-fitting ellipse: data=1.4917, piston demol=0.9927, phased array=1.8984
+
 * Location of beam center for data (20:5:60): 
 
 	```matlab
