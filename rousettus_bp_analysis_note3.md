@@ -195,7 +195,7 @@ Move most BEM calculation results off from the gal-e server. Only keep the ones 
 	
 	so the azimuthal beam center movement is 25.7 deg for 5 mm of tongue position change.
 	
-      * for tongue position '2345':
+* for tongue position '2345':
 	
 	```matlab
 	>> ectr_all = 
